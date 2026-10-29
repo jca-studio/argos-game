@@ -55,6 +55,7 @@ const POOL = [{"name":"Russell Hobbs 800W Standard Microwave RHM2061","gbp":80.0
 /* ---- helpers ---- */
 const gbp = n => "£"+(Math.round(n*100)/100).toLocaleString("en-GB",{minimumFractionDigits:(n%1?2:0),maximumFractionDigits:2});
 const pts = (g,a) => Math.max(0, Math.round(100*(1-Math.abs(g-a)/a)));
+function cleanPrice(v){v=String(v).replace(/[^0-9.]/g,"");const i=v.indexOf(".");if(i>=0){v=v.slice(0,i+1)+v.slice(i+1).replace(/\./g,"");const d=v.split(".");if(d[1]!==undefined)v=d[0]+"."+d[1].slice(0,2);}return v;}
 const COLORS = ["#C8102E","#174A2B","#C9A646","#2B6CB0","#8F0A20","#B7791F","#2F855A","#6B46C1","#B83280","#2C7A7B"];
 const ROUND_MS = 25000;
 const randCode = () => String(Math.floor(1000+Math.random()*9000));
@@ -155,13 +156,15 @@ function ScratchCard({prize}){
 const BONUS=["Double points next round!","+50 bonus points","Steal 20 from the leader","Closest wins a chocolate","+100 if you're last"];
 
 /* ---- host actions (single writer) ---- */
-function hostStart(code,room){ const d=Date.now()+ROUND_MS; const up={phase:"guessing",round:0,deadline:d}; const players={}; Object.entries(room.players||{}).forEach(([id,p])=>players[id]={...p,guess:null,locked:false,rpts:0,won:false}); up.players=players; roomRef(code).update(up); }
+function hostStart(code,room){ const d=Date.now()+ROUND_MS; const up={phase:"guessing",round:0,deadline:d}; const players={}; Object.entries(room.players||{}).forEach(([id,p])=>players[id]={...p,guess:null,locked:false,rpts:0,won:false}); up.players=players; up.history=null; roomRef(code).update(up); }
 function hostReveal(code,room){
+  if(!room||room.phase!=="guessing") return;
   const item=POOL[room.order[room.round]];
   const ps=Object.entries(room.players||{});
   let best=Infinity; ps.forEach(([id,p])=>{ if(p.guess!=null) best=Math.min(best,Math.abs(p.guess-item.gbp)); });
-  const players={};
-  ps.forEach(([id,p])=>{ const rp=p.guess!=null?pts(p.guess,item.gbp):0; players[id]={...p,rpts:rp,total:(p.total||0)+rp,won:p.guess!=null&&Math.abs(p.guess-item.gbp)===best}; });
+  const players={}, guesses={};
+  ps.forEach(([id,p])=>{ const rp=p.guess!=null?pts(p.guess,item.gbp):0; players[id]={...p,rpts:rp,total:(p.total||0)+rp,won:p.guess!=null&&Math.abs(p.guess-item.gbp)===best}; if(p.guess!=null) guesses[id]=p.guess; });
+  roomRef(code).child("history").push({idx:room.order[room.round], price:item.gbp, g:guesses});
   roomRef(code).update({phase:"reveal",players,deadline:null});
 }
 function hostNext(code,room){ const r=room.round+1; if(r>=Math.min(POOL.length,room.order.length)) { roomRef(code).update({phase:"final"}); return; }
@@ -249,24 +252,59 @@ function HostScreen({code,room}){
         </div>
       )}
 
-      {room.phase==="final" && <Final room={room} onAgain={()=>roomRef(code).update({phase:"lobby",round:0,order:shuffledOrder()})}/>}
+      {room.phase==="final" && <Final room={room} onAgain={()=>roomRef(code).update({phase:"lobby",round:0,order:shuffledOrder(),history:null})}/>}
+    </div>
+  );
+}
+function ScoreSheet({room}){
+  const hist=room&&room.history?Object.values(room.history):[];
+  const players=playerList(room).sort((a,b)=>(b.total||0)-(a.total||0));
+  if(!hist.length) return <div className="text-white/60 text-sm text-center">No rounds recorded.</div>;
+  return (
+    <div className="bg-[#FBF6EC] text-[#1A1410] rounded-2xl p-3 overflow-x-auto no-scrollbar shadow-xl">
+      <table className="text-sm" style={{borderCollapse:"collapse",width:"100%",minWidth:150+players.length*72}}>
+        <thead><tr className="border-b-2 border-[#E6D9BF]">
+          <th className="text-left p-2 text-[#8a7a5f] font-bold">Item</th>
+          <th className="p-2 text-[#C8102E] font-bold">Price</th>
+          {players.map(p=><th key={p.id} className="p-2 font-bold" style={{color:p.color}}>{p.name}</th>)}
+        </tr></thead>
+        <tbody>
+          {hist.map((h,ri)=>{
+            const it=POOL[h.idx]||{}; const g=h.g||{};
+            let best=Infinity; players.forEach(p=>{const v=g[p.id]; if(v!=null) best=Math.min(best,Math.abs(v-h.price));});
+            return (<tr key={ri} className="border-b border-[#E6D9BF]">
+              <td className="p-2"><div className="flex items-center gap-2">{it.img?<img src={it.img} className="w-9 h-9 object-contain bg-white rounded shrink-0"/>:null}<span className="text-xs font-semibold leading-tight" style={{maxWidth:130}}>{it.name}</span></div></td>
+              <td className="p-2 text-center font-display font-extrabold text-[#C8102E] tnum whitespace-nowrap">{gbp(h.price)}</td>
+              {players.map(p=>{const v=g[p.id]; const win=v!=null&&Math.abs(v-h.price)===best;
+                return <td key={p.id} className="p-2 text-center tnum whitespace-nowrap">{v!=null?<span className={win?"inline-block px-2 py-0.5 rounded-full bg-[#C8102E] text-white font-bold":"text-[#4a4032]"}>{gbp(v)}</span>:<span className="text-[#bbb]">—</span>}</td>;})}
+            </tr>);
+          })}
+          <tr className="border-t-2 border-[#C8102E]">
+            <td className="p-2 font-display font-bold">Totals</td><td/>
+            {players.map(p=><td key={p.id} className="p-2 text-center font-display font-extrabold tnum">{p.total||0}</td>)}
+          </tr>
+        </tbody>
+      </table>
+      <div className="text-[10px] text-[#8a7a5f] mt-2 text-center">Closest guess each row is circled in red.</div>
     </div>
   );
 }
 function Final({room,onAgain}){
   const win=playerList(room).sort((a,b)=>(b.total||0)-(a.total||0))[0];
-  return (<div className="flex-1 grid place-items-center text-center px-8"><div>
-    <div className="text-6xl mb-2 floaty">🏆</div>
-    <div className="text-white/60 uppercase tracking-widest text-sm font-bold">Winner</div>
-    <div className="font-display font-extrabold text-6xl text-[#C9A646] pop">{win?win.name:"—"}</div>
-    {win&&<div className="text-2xl mt-1">with {win.total} points</div>}
-    <div className="mt-6 max-w-sm mx-auto"><Leaderboard room={room} compact/></div>
-    <div className="mt-6"><Btn tone="pine" onClick={onAgain}>↺ Play again</Btn></div>
-  </div></div>);
+  return (<div className="flex-1 overflow-auto no-scrollbar px-5 py-6">
+    <div className="text-center mb-5">
+      <div className="text-5xl mb-1 floaty">🏆</div>
+      <div className="text-white/60 uppercase tracking-widest text-xs font-bold">Winner</div>
+      <div className="font-display font-extrabold text-5xl text-[#C9A646] pop">{win?win.name:"—"}</div>
+      {win&&<div className="text-xl mt-1">with {win.total} points</div>}
+    </div>
+    <div className="max-w-3xl mx-auto"><ScoreSheet room={room}/></div>
+    <div className="text-center mt-5"><Btn tone="pine" onClick={onAgain}>↺ Play again</Btn></div>
+  </div>);
 }
 
 function PlayerScreen({code,room}){
-  const [val,setVal]=useState(50); const [tab,setTab]=useState("slider");
+  const [val,setVal]=useState("");
   if(!room) return <Splash msg="Joining…"/>;
   const me = room.players&&room.players[myId];
   const item = room.order? POOL[room.order[room.round]] : null;
@@ -282,14 +320,14 @@ function PlayerScreen({code,room}){
           <Photo idx={room.order[room.round]} reveal={false} cls="h-36"/>
           <div className="font-display font-bold text-lg text-center mt-5">{item.name}</div>
           <div className="text-[#8a7a5f] text-sm text-center mb-4">{item.desc}</div>
-          <div className="flex gap-2 bg-black/5 rounded-full p-1 mb-4">
-            <button onClick={()=>setTab("slider")} className={"px-4 py-1.5 rounded-full text-sm font-bold "+(tab==="slider"?"bg-white shadow text-[#C8102E]":"text-[#8a7a5f]")}>Slider</button>
-            <button onClick={()=>setTab("pad")} className={"px-4 py-1.5 rounded-full text-sm font-bold "+(tab==="pad"?"bg-white shadow text-[#C8102E]":"text-[#8a7a5f]")}>Keypad</button>
+          <label className="text-[#8a7a5f] text-sm font-bold mb-2">Type your price guess</label>
+          <div className="w-full max-w-[300px] flex items-stretch bg-white border-2 border-[#E6D9BF] focus-within:border-[#C8102E] rounded-2xl overflow-hidden shadow-sm">
+            <span className="flex items-center px-4 bg-[#C8102E]/10 text-[#C8102E] font-display font-extrabold text-2xl">£</span>
+            <input id="g" inputMode="decimal" value={val} onChange={e=>setVal(cleanPrice(e.target.value))} placeholder="0.00" autoFocus className="flex-1 min-w-0 px-3 py-4 text-3xl font-display font-extrabold tnum outline-none bg-transparent text-[#1A1410]"/>
           </div>
-          <div className="font-display font-extrabold text-5xl text-[#C8102E] mb-4 tnum">£{val}</div>
-          {tab==="slider"? <input type="range" min="1" max="1000" value={val} onChange={e=>setVal(+e.target.value)} className="w-full accent-[#C8102E] h-2 mb-2"/> : <Keypad val={val} setVal={setVal}/>}
+          <div className="text-[#8a7a5f] text-xs mt-2">Guess to the penny, e.g. 24.99</div>
         </div>
-        <div className="p-4"><Btn tone="red" className="w-full py-4 text-lg" onClick={()=>roomRef(code).child("players/"+myId).update({guess:val,locked:true})}>🔒 Lock In Guess</Btn></div>
+        <div className="p-4"><Btn tone="red" className="w-full py-4 text-lg" disabled={!(parseFloat(val)>0)} onClick={()=>roomRef(code).child("players/"+myId).update({guess:parseFloat(val),locked:true})}>🔒 Lock In Guess</Btn></div>
       </div>
     );
   }
@@ -300,15 +338,18 @@ function PlayerScreen({code,room}){
       <div className="text-white/70 text-xs uppercase tracking-widest font-bold">It was</div>
       <div className="font-display font-extrabold text-5xl text-[#C9A646] pop mb-1">{gbp(item.gbp)}</div>
       <div className="text-center mb-4"><div className="text-white/80">You guessed <b>{me&&me.guess!=null?gbp(me.guess):"—"}</b></div><div className="font-display font-extrabold text-3xl text-[#9BE5A0]">+{yp} pts</div>{me&&me.won&&<div className="text-[#E7C96B] font-bold text-sm">🎯 Closest this round!</div>}</div>
-      <div className="text-xs uppercase tracking-widest font-bold text-white/60 mb-2">Your bonus card</div>
-      <ScratchCard prize={BONUS[room.round%BONUS.length]}/>
-      <div className="w-full mt-6"><div className="text-xs uppercase tracking-widest font-bold text-white/60 mb-2">Standings</div><Leaderboard room={room} compact/></div>
+      <div className="w-full mt-2"><div className="text-xs uppercase tracking-widest font-bold text-white/60 mb-2">Standings so far</div><Leaderboard room={room} compact/></div>
     </div>);
   }
 
   if(room.phase==="final"){
     const rank=playerList(room).sort((a,b)=>(b.total||0)-(a.total||0)).findIndex(p=>p.id===myId)+1;
-    return <Center bg="pine"><div className="text-5xl mb-2">🎄</div><div className="font-display font-extrabold text-3xl">That's a wrap!</div><div className="text-white/70 mb-3">You finished</div><div className="font-display font-extrabold text-6xl text-[#C9A646]">#{rank||"—"}</div></Center>;
+    return (<div className="min-h-screen bg-gradient-to-b from-[#174A2B] to-[#0e3019] text-white flex flex-col items-center px-4 py-6 overflow-auto no-scrollbar">
+      <div className="text-5xl mb-1">🎄</div>
+      <div className="font-display font-extrabold text-2xl">That's a wrap!</div>
+      <div className="text-white/80 mb-4">You finished <b className="text-[#C9A646]">#{rank||"—"}</b></div>
+      <div className="w-full max-w-md"><ScoreSheet room={room}/></div>
+    </div>);
   }
   return <Splash msg="Waiting for the next round…"/>;
 }
