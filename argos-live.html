@@ -58,6 +58,7 @@ const pts = (g,a) => Math.max(0, Math.round(100*(1-Math.abs(g-a)/a)));
 function cleanPrice(v){v=String(v).replace(/[^0-9.]/g,"");const i=v.indexOf(".");if(i>=0){v=v.slice(0,i+1)+v.slice(i+1).replace(/\./g,"");const d=v.split(".");if(d[1]!==undefined)v=d[0]+"."+d[1].slice(0,2);}return v;}
 const COLORS = ["#C8102E","#174A2B","#C9A646","#2B6CB0","#8F0A20","#B7791F","#2F855A","#6B46C1","#B83280","#2C7A7B"];
 const ROUND_MS = 25000;
+const ROUND_N = 6;   // items per game
 const randCode = () => String(Math.floor(1000+Math.random()*9000));
 const myId = (()=>{ try{let v=localStorage.getItem("argosId"); if(!v){v=Math.random().toString(36).slice(2,10); localStorage.setItem("argosId",v);} return v;}catch(e){return Math.random().toString(36).slice(2,10);} })();
 function shuffledOrder(){ const a=POOL.map((_,i)=>i); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
@@ -189,9 +190,11 @@ function Landing({onHost,onJoin,prefill}){
         </div>
       </div>
       <div className="w-full max-w-sm bg-white/10 rounded-2xl p-5 ring-1 ring-white/15 mb-4">
-        <div className="text-xs uppercase tracking-widest font-bold text-white/60 mb-2">Join a game</div>
-        <input value={name} onChange={e=>setName(e.target.value)} placeholder="Your name" maxLength={14} className="w-full rounded-xl px-4 py-3 text-[#1A1410] font-semibold mb-2 outline-none"/>
-        <input value={code} onChange={e=>setCode(e.target.value.replace(/\D/g,"").slice(0,4))} inputMode="numeric" placeholder="4-digit code" className="w-full rounded-xl px-4 py-3 text-[#1A1410] font-display font-extrabold text-2xl tracking-[0.3em] text-center mb-3 outline-none"/>
+        <div className="text-xs uppercase tracking-widest font-bold text-white/60 mb-3">Join a game</div>
+        <label className="block text-sm font-bold text-white mb-1">1 &middot; Your name</label>
+        <input value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Matt" maxLength={14} className="w-full rounded-xl px-4 py-3 bg-white text-[#1A1410] font-semibold mb-4 outline-none ring-2 ring-transparent focus:ring-white"/>
+        <label className="block text-sm font-bold text-[#E7C96B] mb-1">2 &middot; Room code <span className="font-normal text-white/50">(shown on the TV)</span></label>
+        <input value={code} onChange={e=>setCode(e.target.value.replace(/\D/g,"").slice(0,4))} inputMode="numeric" placeholder="0000" className="w-full rounded-xl px-4 py-3 bg-[#FFF6DD] text-[#8a6d12] border-2 border-[#C9A646] font-display font-extrabold text-2xl tracking-[0.4em] text-center mb-4 outline-none placeholder:text-[#d8c88a]"/>
         <Btn tone="gold" className="w-full py-3" disabled={name.trim().length<1||code.length!==4} onClick={()=>onJoin(code,name.trim())}>Join game →</Btn>
       </div>
       <div className="text-white/50 text-sm mb-2">or</div>
@@ -216,13 +219,14 @@ function HostScreen({code,room}){
         <div><div className="font-hand text-[#E7C96B] text-lg leading-none">Christmas Day</div><div className="font-display font-extrabold text-3xl">The Argos Game</div></div>
         <div className="flex items-center gap-4">
           <div className="text-right"><div className="text-white/60 text-xs uppercase tracking-widest font-bold">Join with code</div><div className="font-display font-extrabold text-5xl tracking-[0.2em] text-[#C9A646] tnum">{code}</div></div>
-          <QR text={joinUrl} size={104}/>
+          <QR text={joinUrl} size={132}/>
         </div>
       </div>
 
       {room.phase==="lobby" && (
         <div className="flex-1 grid place-items-center text-center px-8">
           <div>
+            <div className="flex justify-center mb-4"><QR text={joinUrl} size={208}/></div>
             <div className="text-white/70 text-lg mb-4">Scan the code or go to this page and enter <b className="text-[#C9A646]">{code}</b></div>
             <div className="flex flex-wrap items-center justify-center gap-2 max-w-2xl mb-8">
               {players.length?players.map(p=>(<div key={p.id} className="flex items-center gap-2 bg-white/10 rounded-full pl-1 pr-3 py-1"><div className="w-6 h-6 rounded-full grid place-items-center text-xs font-bold" style={{background:p.color}}>{(p.name||"?")[0].toUpperCase()}</div><span className="text-sm font-semibold">{p.name}</span></div>)):<span className="text-white/50">Waiting for players to join…</span>}
@@ -252,7 +256,7 @@ function HostScreen({code,room}){
         </div>
       )}
 
-      {room.phase==="final" && <Final room={room} onAgain={()=>roomRef(code).update({phase:"lobby",round:0,order:shuffledOrder(),history:null})}/>}
+      {room.phase==="final" && <Final room={room} onAgain={()=>roomRef(code).update({phase:"lobby",round:0,order:shuffledOrder().slice(0,ROUND_N),history:null})}/>}
     </div>
   );
 }
@@ -289,6 +293,38 @@ function ScoreSheet({room}){
     </div>
   );
 }
+function awardsFrom(room){
+  const players=playerList(room); const hist=room&&room.history?Object.values(room.history):[];
+  if(!players.length||!hist.length) return [];
+  const st={}; players.forEach(p=>st[p.id]={name:p.name,wins:0,total:0,err:0,wild:-1,wi:null});
+  hist.forEach(h=>{ const price=h.price, g=h.g||{};
+    let best=Infinity; players.forEach(p=>{const v=g[p.id]; if(v!=null)best=Math.min(best,Math.abs(v-price));});
+    players.forEach(p=>{const v=g[p.id]; if(v==null)return; const d=Math.abs(v-price); st[p.id].total+=v; st[p.id].err+=d; const r=d/price; if(r>st[p.id].wild){st[p.id].wild=r;st[p.id].wi={g:v,p:price};} if(d===best)st[p.id].wins++;});
+  });
+  const ids=players.map(p=>p.id);
+  const top=(fn,dir)=>ids.slice().sort((a,b)=>(fn(st[b])-fn(st[a]))*(dir||1))[0];
+  const sn=top(s=>s.wins), sp=top(s=>s.total), wd=top(s=>s.wild), cd=top(s=>s.err);
+  return [
+    {e:"🎯",t:"Spot-On Sniper",n:st[sn].name,d:`closest on ${st[sn].wins} ${st[sn].wins===1?"item":"items"}`},
+    {e:"🌋",t:"Wildest Guess",n:st[wd].name,d:st[wd].wi?`guessed ${gbp(st[wd].wi.g)}, it was ${gbp(st[wd].wi.p)}`:""},
+    {e:"🤑",t:"Biggest Spender",n:st[sp].name,d:`${gbp(st[sp].total)} of guesses`},
+    {e:"🧊",t:"Ice Cold",n:st[cd].name,d:`${gbp(st[cd].err)} off all night`},
+  ];
+}
+function Awards({room}){
+  const a=awardsFrom(room); if(!a.length) return null;
+  return (<div className="mt-5">
+    <div className="text-center font-hand text-2xl text-[#E7C96B] mb-2">And the awards go to…</div>
+    <div className="grid grid-cols-2 gap-2">
+      {a.map((x,i)=>(<div key={i} className="bg-white/10 rounded-xl p-3 ring-1 ring-white/10 text-left">
+        <div className="text-2xl leading-none mb-1">{x.e}</div>
+        <div className="font-bold text-xs text-white">{x.t}</div>
+        <div className="font-display font-extrabold text-xl text-[#C9A646] leading-tight">{x.n}</div>
+        <div className="text-[11px] text-white/60 leading-tight">{x.d}</div>
+      </div>))}
+    </div>
+  </div>);
+}
 function Final({room,onAgain}){
   const win=playerList(room).sort((a,b)=>(b.total||0)-(a.total||0))[0];
   return (<div className="flex-1 overflow-auto no-scrollbar px-5 py-6">
@@ -299,6 +335,7 @@ function Final({room,onAgain}){
       {win&&<div className="text-xl mt-1">with {win.total} points</div>}
     </div>
     <div className="max-w-3xl mx-auto"><ScoreSheet room={room}/></div>
+    <div className="max-w-md mx-auto"><Awards room={room}/></div>
     <div className="text-center mt-5"><Btn tone="pine" onClick={onAgain}>↺ Play again</Btn></div>
   </div>);
 }
@@ -320,12 +357,10 @@ function PlayerScreen({code,room}){
           <Photo idx={room.order[room.round]} reveal={false} cls="h-36"/>
           <div className="font-display font-bold text-lg text-center mt-5">{item.name}</div>
           <div className="text-[#8a7a5f] text-sm text-center mb-4">{item.desc}</div>
-          <label className="text-[#8a7a5f] text-sm font-bold mb-2">Type your price guess</label>
-          <div className="w-full max-w-[300px] flex items-stretch bg-white border-2 border-[#E6D9BF] focus-within:border-[#C8102E] rounded-2xl overflow-hidden shadow-sm">
-            <span className="flex items-center px-4 bg-[#C8102E]/10 text-[#C8102E] font-display font-extrabold text-2xl">£</span>
-            <input id="g" inputMode="decimal" value={val} onChange={e=>setVal(cleanPrice(e.target.value))} placeholder="0.00" autoFocus className="flex-1 min-w-0 px-3 py-4 text-3xl font-display font-extrabold tnum outline-none bg-transparent text-[#1A1410]"/>
-          </div>
-          <div className="text-[#8a7a5f] text-xs mt-2">Guess to the penny, e.g. 24.99</div>
+          <label className="text-[#8a7a5f] text-sm font-bold mb-1">Your price guess</label>
+          <div className="font-display font-extrabold text-5xl text-[#C8102E] mb-4 tnum">£{val||"0"}</div>
+          <Keypad val={val} setVal={setVal}/>
+          <div className="text-[#8a7a5f] text-xs mt-3">Tap <b>.</b> to add pennies, e.g. 24.99</div>
         </div>
         <div className="p-4"><Btn tone="red" className="w-full py-4 text-lg" disabled={!(parseFloat(val)>0)} onClick={()=>roomRef(code).child("players/"+myId).update({guess:parseFloat(val),locked:true})}>🔒 Lock In Guess</Btn></div>
       </div>
@@ -349,18 +384,24 @@ function PlayerScreen({code,room}){
       <div className="font-display font-extrabold text-2xl">That's a wrap!</div>
       <div className="text-white/80 mb-4">You finished <b className="text-[#C9A646]">#{rank||"—"}</b></div>
       <div className="w-full max-w-md"><ScoreSheet room={room}/></div>
+      <div className="w-full max-w-md"><Awards room={room}/></div>
     </div>);
   }
   return <Splash msg="Waiting for the next round…"/>;
 }
 function Keypad({val,setVal}){
-  const push=d=>setVal(Math.min(999999,+((String(val)==="0"?"":String(val))+d)));
-  const keys=["1","2","3","4","5","6","7","8","9"];
-  return (<div className="grid grid-cols-3 gap-2 w-full">
-    {keys.map(k=><button key={k} onClick={()=>push(k)} className="bg-white rounded-xl py-3 font-display font-bold text-xl shadow ring-1 ring-black/5 active:translate-y-[1px]">{k}</button>)}
-    <button onClick={()=>setVal(0)} className="bg-white rounded-xl py-3 font-bold text-sm shadow ring-1 ring-black/5 text-[#8a7a5f]">C</button>
-    <button onClick={()=>push("0")} className="bg-white rounded-xl py-3 font-display font-bold text-xl shadow ring-1 ring-black/5">0</button>
-    <button onClick={()=>setVal(+(String(val).slice(0,-1)||0))} className="bg-white rounded-xl py-3 font-bold text-xl shadow ring-1 ring-black/5">⌫</button>
+  const s=String(val||"");
+  const push=d=>{
+    if(d==="."){ if(s.includes(".")) return; setVal((s||"0")+"."); return; }
+    if(s.includes(".") && (s.split(".")[1]||"").length>=2) return;
+    const n=(s==="0"?"":s)+d; if(n.replace(".","").length>7) return; setVal(n);
+  };
+  const K=({children,onClick})=><button onClick={onClick} className="bg-white rounded-xl py-4 font-display font-bold text-2xl shadow ring-1 ring-black/5 active:translate-y-[1px]">{children}</button>;
+  return (<div className="grid grid-cols-3 gap-2 w-full max-w-[320px]">
+    {["1","2","3","4","5","6","7","8","9"].map(k=><K key={k} onClick={()=>push(k)}>{k}</K>)}
+    <K onClick={()=>push(".")}>.</K>
+    <K onClick={()=>push("0")}>0</K>
+    <K onClick={()=>setVal(s.slice(0,-1))}>⌫</K>
   </div>);
 }
 function Center({children,bg}){ return <div className={"min-h-screen flex flex-col items-center justify-center text-center px-6 text-white "+(bg==="pine"?"bg-gradient-to-b from-[#174A2B] to-[#0e3019]":"bg-gradient-to-b from-[#CE3320] to-[#AE2817]")}>{children}</div>; }
@@ -394,7 +435,7 @@ function App(){
 
   if(!FB_OK) return <SetupNeeded/>;
 
-  function startHost(){ const c=randCode(); roomRef(c).set({host:myId,phase:"lobby",round:0,order:shuffledOrder(),players:{},createdAt:Date.now()}).then(()=>{setCode(c);setRole("host");}).catch(e=>setErr(String(e))); }
+  function startHost(){ const c=randCode(); roomRef(c).set({host:myId,phase:"lobby",round:0,order:shuffledOrder().slice(0,ROUND_N),players:{},createdAt:Date.now()}).then(()=>{setCode(c);setRole("host");}).catch(e=>setErr(String(e))); }
   function joinGame(c,name){ roomRef(c).get().then(s=>{ if(!s.exists()){setErr("No game with code "+c+". Check the code on the screen.");return;} const color=COLORS[Math.abs([...name].reduce((a,ch)=>a+ch.charCodeAt(0),0))%COLORS.length]; roomRef(c).child("players/"+myId).update({name,color,total:0,guess:null,locked:false,rpts:0}).then(()=>{setCode(c);setRole("player");}); }).catch(e=>setErr(String(e))); }
 
   if(!role) return (<div>{err&&<div className="fixed top-3 inset-x-3 z-50 bg-[#C8102E] text-white text-sm rounded-xl px-4 py-2 text-center">{err}</div>}<Landing onHost={startHost} onJoin={joinGame} prefill={code}/></div>);
