@@ -1,0 +1,1123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Argos Game · Live</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.26.4/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-database-compat.js"></script>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<style>
+  html,body{margin:0;background:#AE2817;}
+  body{font-family:"Hanken Grotesk",system-ui,sans-serif;}
+  .font-display{font-family:"Fraunces",serif;}
+  .font-hand{font-family:"Kalam",cursive;}
+  .tnum{font-variant-numeric:tabular-nums;}
+  .no-scrollbar::-webkit-scrollbar{display:none;} .no-scrollbar{scrollbar-width:none;}
+  @keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+  .pop{animation:pop .4s cubic-bezier(.2,.9,.3,1.3) both}
+  @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  .floaty{animation:floaty 3s ease-in-out infinite}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+/* ============================================================
+   FIREBASE CONFIG  —  paste your own values here (see the chat).
+   These are CLIENT keys and are safe to be public; security comes
+   from the Realtime Database rules, not from hiding this.
+   ============================================================ */
+window.ARGOS_FIREBASE_CONFIG = {
+  apiKey: "AIzaSyD5pWZzV5Ni4YkrDHId8F0DOxBjySs21So",
+  authDomain: "jca-studio-argos.firebaseapp.com",
+  databaseURL: "https://jca-studio-argos-default-rtdb.firebaseio.com",
+  projectId: "jca-studio-argos",
+  appId: "1:488122131199:web:7c9f6a4a89fce968f4e2ca"
+};
+</script>
+
+<script type="text/babel" data-presets="react">
+const {useState,useEffect,useRef} = React;
+const TREVOR_SVG = `<svg width="118" height="131" viewBox="0 0 220 244" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Trevor the dinosaur wearing a Santa hat"><path d="M72 182 Q22 184 16 150 Q42 166 80 160 Z" fill="#4E9B36"/><path d="M60 176 l-14 -4 l10 -9 Z" fill="#E8812E"/><path d="M44 170 l-14 -2 l9 -10 Z" fill="#E8812E"/><ellipse cx="90" cy="216" rx="24" ry="16" fill="#4E9B36"/><ellipse cx="142" cy="216" rx="24" ry="16" fill="#57A639"/><circle cx="76" cy="222" r="5" fill="#E8812E"/><circle cx="90" cy="225" r="5" fill="#E8812E"/><circle cx="104" cy="222" r="5" fill="#E8812E"/><circle cx="128" cy="222" r="5" fill="#E8812E"/><circle cx="142" cy="225" r="5" fill="#E8812E"/><circle cx="156" cy="222" r="5" fill="#E8812E"/><path d="M60 152 Q54 74 116 70 Q178 74 172 152 Q170 208 116 208 Q62 208 60 152 Z" fill="#5CA83C"/><ellipse cx="117" cy="154" rx="40" ry="52" fill="#CBE8A6"/><path d="M68 138 q-15 6 -13 23 q11 -9 18 -8 Z" fill="#57A639"/><path d="M164 138 q15 6 13 23 q-11 -9 -18 -8 Z" fill="#4E9B36"/><circle cx="99" cy="112" r="15" fill="#fff"/><circle cx="135" cy="112" r="15" fill="#fff"/><circle cx="102" cy="114" r="6.5" fill="#222"/><circle cx="132" cy="114" r="6.5" fill="#222"/><circle cx="104.3" cy="111" r="2.1" fill="#fff"/><circle cx="134.3" cy="111" r="2.1" fill="#fff"/><circle cx="84" cy="132" r="7" fill="#F6A96B" opacity=".55"/><circle cx="150" cy="132" r="7" fill="#F6A96B" opacity=".55"/><path d="M98 138 Q117 160 137 138 Q117 150 98 138 Z" fill="#7a3b23"/><path d="M98 138 Q117 153 137 138" fill="none" stroke="#3a6b26" stroke-width="3" stroke-linecap="round"/><path d="M106 143 l4 6 l4 -6 Z" fill="#fff"/><path d="M126 143 l4 6 l4 -6 Z" fill="#fff"/><path d="M72 66 Q66 32 112 28 Q158 24 178 44 Q156 58 150 62 Q112 52 72 66 Z" fill="#CE3320"/><path d="M110 30 Q150 26 176 44 Q150 50 120 46 Z" fill="#E24A38" opacity=".55"/><circle cx="180" cy="42" r="13" fill="#fff"/><circle cx="180" cy="42" r="13" fill="#F3F3F3"/><circle cx="178" cy="40" r="12" fill="#fff"/><path d="M64 66 Q116 50 160 64 Q163 76 150 78 Q112 66 74 78 Q62 76 64 66 Z" fill="#fff"/><path d="M64 66 Q116 52 160 64 Q140 60 116 60 Q90 60 64 66 Z" fill="#EDEDED" opacity=".7"/></svg>`;
+
+/* ---- real Argos product pool (names, prices, photos, descriptions baked in) ---- */
+const POOL = [
+{name:"Gioteck XH100P PS5, PS4, Xbox, Switch, PC, Gaming Headset",gbp:12.99,code:"9308514",v:0},
+{name:"Habitat Elara 2 Seater Metal Garden Bistro Set - White",gbp:62.5,code:"4352709",v:0},
+{name:"LEGO Classic Large Creative Brick Storage Box Set 10698",gbp:45,code:"4356279",v:0},
+{name:"Limit Men's Brown Faux Leather Strap Watch",gbp:11.2,code:"7243736",v:0},
+{name:"Argos Home Faux Leather Mid Back Gaming Chair - Red & Black",gbp:53,code:"7248353",v:0},
+{name:"Habitat 150 Multicoloured Pickwick LED Christmas Tree Lights",gbp:15,code:"6436300",v:0},
+{name:"Dolce Gusto Genio S by De'Longhi EDG225.W Pod Machine",gbp:55,code:"1930083",v:0},
+{name:"De'Longhi EC260.GR Stilosa Espresso Coffee Machine",gbp:98.99,code:"1930272",v:0},
+{name:"Pioneer DJ HDJ-CUE1 On-Ear Wired Headphones - Grey",gbp:59,code:"1482854",v:0},
+{name:"Sage SES450BSS4GUK1 Bambino Espresso Coffee Machine",gbp:329.95,code:"1933884",v:0},
+{name:"Tower Cordless Handheld Vacuum Cleaner",gbp:24.99,code:"1484027",v:0},
+{name:"Argos Home Kids Bears Cream Bedding Set",gbp:12,code:"8512057",v:0},
+{name:"Hisense 40 Inch 40E4STUK Smart Full HD LED Freely TV",gbp:199,code:"8512143",v:0},
+{name:"Trevor Dinosaurs Hanging Christmas Ornament",gbp:5,code:"8512569",v:0},
+{name:"Cookworks 9L Dual Air Fryer - Black",gbp:100,code:"1486630",v:0},
+{name:"TCL 43 Inch 43SF560-UK Smart FHD HDR QLED Freely TV",gbp:199,code:"7701694",v:0},
+{name:"De'Longhi ECAM450.86.T Eletta Automatic Coffee Machine",gbp:999,code:"1489431",v:0},
+{name:"Habitat Glass Tortoise Shell Table Lamp - Brown",gbp:32,code:"7704505",v:0},
+{name:"Chad Valley Ball Pop Character",gbp:12,code:"7704622",v:0},
+{name:"Stylpro Heated Led Electric Gua Sha",gbp:30,code:"7705463",v:0},
+{name:"Belkin SoundForm Mini Kids On Ear Wireless Bluetooth Headphones - Pink",gbp:29.99,code:"4371034",v:0},
+{name:"Argos Home Cusco 4 Seater Rattan Effect Patio Set - Natural",gbp:280,code:"4377753",v:0},
+{name:"Baylis & Harding Luxury Light Up Bubble Bath",gbp:9,code:"4379995",v:0},
+{name:"Shark Classic Pet Cordless Handheld Vacuum Cleaner",gbp:80,code:"9335714",v:0},
+{name:"Chad Valley Woodland Building Blocks Set",gbp:12,code:"7710001",v:0},
+{name:"Pezzetti Italexpress Coffee Maker - 3 Cups",gbp:11,code:"7710166",v:0},
+{name:"Pezzetti Italexpress Coffee Maker - 6 Cups",gbp:15,code:"7710393",v:0},
+{name:"Stylpro Red & Infrared Thermal Brush",gbp:55,code:"7711495",v:0},
+{name:"Vtech Learn & Discover Baby Book",gbp:15,code:"7263493",v:0},
+{name:"Google Pixel Buds 2A True Wireless Earbuds - Hazel",gbp:129,code:"7715271",v:0},
+{name:"Argos Home Wicker Ball Table Lamp - Natural",gbp:36,code:"7266799",v:0},
+{name:"Habitat Pack of 6 Red Velvet Bows Christmas Tree Decoration",gbp:5,code:"7268948",v:0},
+{name:"Chad Valley Wooden Beauty Set",gbp:12,code:"7719947",v:0},
+{name:"Argos Home 5ft Artificial Christmas Tree",gbp:14,code:"5641213",v:0},
+{name:"HyperX Cloud III Wired Gaming Headset Xbox, PS5, Switch, PC",gbp:84.99,code:"5644241",v:0},
+{name:"Manchester United Football Kids Bedding Set",gbp:24,code:"5645642",v:0},
+{name:"Miele Boost CX1 Corded Bagless Cylinder Vacuum Cleaner",gbp:299,code:"1950908",v:0},
+{name:"Limit Ladies Burgundy Faux Leather Strap Watch",gbp:10,code:"1951093",v:0},
+{name:"Hetty Quick Cordless Vacuum Cleaner",gbp:199.99,code:"1951392",v:0},
+{name:"Sony WH-CH520 On-Ear Wireless Bluetooth Headphones - Blue",gbp:29.99,code:"1953572",v:0},
+{name:"W7 Citrus Coast Body Mist and Body Cream Travel Sets - 200ml",gbp:10,code:"8531430",v:0},
+{name:"Hisense 43 Inch 43A6STUK Smart 4K UHD HDR AI Freely TV",gbp:249,code:"8531502",v:0},
+{name:"De'Longhi EC260CR Stilosa Manual Espresso Coffee Machine",gbp:98.99,code:"1954708",v:0},
+{name:"Hisense 58 Inch 58E6STUK Smart 4K UHD HDR Freely AI TV",gbp:379,code:"8533122",v:0},
+{name:"Argos Home Floral Print Blue Bedding Set",gbp:10,code:"8533311",v:0},
+{name:"JBL Tune 530BT On-Ear Bluetooth Wireless Headphones - Black",gbp:29.99,code:"7721636",v:0},
+{name:"Astro A10 Wired Gaming Headset For PS5/PS4, Xbox, Switch, PC",gbp:34.99,code:"1958845",v:0},
+{name:"Hisense 50 Inch 50A6STUK Smart 4K UHD HDR AI Freely TV",gbp:299,code:"8536648",v:0},
+{name:"Shaf Manhattan 4 Seater Rattan Effect Garden Sofa Set - Grey",gbp:231,code:"7272130",v:0},
+{name:"Sony WH-CH520 On-Ear Wireless Bluetooth Headphones - White",gbp:29.99,code:"1959992",v:0},
+{name:"Habitat 6ft Snowy Mixed Frost With Berries Christmas Tree",gbp:55,code:"7272415",v:0},
+{name:"Henry Bagged Corded Cylinder Vacuum Cleaner - Red",gbp:180,code:"8086071",v:0},
+{name:"Hisense 43 Inch 43E6STUK Smart 4K UHD HDR Freely AI TV",gbp:249,code:"8538691",v:0},
+{name:"Turtle Beach Stealth 500 Xbox & PC Wireless Headset",gbp:59.99,code:"7274729",v:0},
+{name:"LEGO DUPLO Disney Frozen Creative Box with Elsa and Olaf 10462",gbp:18,code:"8539906",v:0},
+{name:"Philips EP5546 70 Full Auto Espresso Coffee Machine",gbp:499,code:"7726899",v:0},
+{name:"LEGO Wednesday Black Dahlia Flower Toy with Mini Dolls 76784",gbp:13,code:"7727544",v:0},
+{name:"Bosch BGB41HYGGB Series 4 Bagged Vacuum Cleaner",gbp:150,code:"7728859",v:0},
+{name:"Habitat Caliban XL Globe Glass Lamp",gbp:33.33,code:"7729377",v:0},
+{name:"Bosch Serie 2 Corded Bagless Cylinder Vacuum Cleaner",gbp:99,code:"4840242",v:0},
+{name:"Turtle Beach Stealth 500 Wireless PS5, PS4, PC Headset",gbp:79.99,code:"4840345",v:0},
+{name:"Hetty Bagged Corded Cylinder Vacuum Cleaner - Pink",gbp:129.99,code:"5654839",v:0},
+{name:"Habitat 1.5ft Hard Needle Small Christmas Tree",gbp:5,code:"4844028",v:0},
+{name:"Turtle Beach Stealth 600 Gen 3 Wireless Xbox, PS5/PC Headset",gbp:99.99,code:"4846325",v:0},
+{name:"Limit Ladies Glow Dial Gold Plated Expander Watch",gbp:17,code:"2772680",v:0},
+{name:"Shokz OpenMove Wireless Bluetooth Headphones - Grey",gbp:79,code:"9352766",v:0},
+{name:"Casio Chronograph Silver Stainless Steel Watch",gbp:19,code:"2775591",v:0},
+{name:"LEGO Editions McLaren Mastercard F1 Team Lando Norris Helmet 43023",gbp:80,code:"8091815",v:0},
+{name:"LEGO Botanicals Rocking Plants Artificial Flowers Set 11506",gbp:18,code:"8092357",v:0},
+{name:"Apple AirPods 5",gbp:119,code:"9808076",v:0},
+{name:"Breville Barista Classic Bean to Cup Coffee Machine",gbp:499.99,code:"8093545",v:0},
+{name:"De'Longhi KG200 Coffee Bean Grinder - Black",gbp:43,code:"8093727",v:0},
+{name:"LEGO Technic Monster Jam Grave Digger Fire and Ice 42219",gbp:25,code:"8093923",v:0},
+{name:"Habitat Timeless 6 Seater Garden Sofa Set",gbp:396,code:"7732711",v:0},
+{name:"LEGO Sonic the Hedgehog Silver vs. Knuckles 77118",gbp:35,code:"8097273",v:0},
+{name:"Melitta 1025-08 LOOK Timer Filter Coffee Maker",gbp:69.99,code:"8099013",v:0},
+{name:"Shark Detect Pet Pro Corded Upright Vacuum Cleaner",gbp:230,code:"7736061",v:0},
+{name:"Logitech G Astro A20 X PS5, Xbox, Switch, PC RGB Headset",gbp:99.99,code:"7736188",v:0},
+{name:"LEGO Creator 3in1 Cute Hamster with a Flower Toy 31376",gbp:9,code:"8099886",v:0},
+{name:"LEGO Speed Champions Porsche 911 GT3 RS Super Car Toy 77239",gbp:23,code:"7737565",v:0},
+{name:"JBL Tune 730BT Wireless Over-Ear Headphones - Black",gbp:39.99,code:"7738117",v:0},
+{name:"Philips Sublime L'OR Pod Coffee Machine - White",gbp:74.99,code:"9360057",v:0},
+{name:"Philips Sublime L'OR Pod Coffee Machine - Black",gbp:114.99,code:"9360095",v:0},
+{name:"Silentnight Middleton 800 Pocket Comfort Mattress",gbp:239,code:"2786683",v:0},
+{name:"Pokemon Kids Black Digital Watch",gbp:8,code:"1973318",v:0},
+{name:"Argos Home Coffee Pod Storage Holder Drawer",gbp:18,code:"1973428",v:0},
+{name:"Sony WH-CH520 On-Ear Wireless Bluetooth Headphones - Black",gbp:29.99,code:"1975282",v:0},
+{name:"LEGO Animal Crossing Goldie's Cosy House Building Set 77058",gbp:18,code:"7741238",v:0},
+{name:"LEGO Botanicals Happy Plants Home Decor Building Set 10349",gbp:18,code:"7741348",v:0},
+{name:"Russell Hobbs Satisfry Dual 27680 9L Basket Air Fryer -Black",gbp:89.99,code:"7742495",v:0},
+{name:"Habitat Pebble Mango Wood Table Lamp - Natural and White",gbp:34,code:"1979271",v:0},
+{name:"Shark FacialPro Glow and DePuffi Home Facial and Spa",gbp:299.99,code:"7743841",v:0},
+{name:"Casio Analogue Green Dial Stainless Steel Bracelet Watch",gbp:44,code:"7293054",v:0},
+{name:"Reflex Active Spectra Series 40 AMOLED Calling Smart Watch",gbp:36,code:"7294280",v:0},
+{name:"Chad Valley Bongo Drum",gbp:12,code:"7297452",v:0},
+{name:"Habitat Rainbow Light Up Christmas Tree Cone",gbp:12,code:"7297957",v:0},
+{name:"Russell Hobbs Satisfry 27610 4.3L Air Fryer - Black",gbp:59.99,code:"7748372",v:0},
+{name:"L'Oreal Paris Revitalift Filler Glass Skin Skincare Gift Set",gbp:25,code:"8561280",v:0},
+{name:"Bubble T Cosmetics Beauty Advent Calendar 2026",gbp:50,code:"8561352",v:0},
+{name:"Bubble T Cosmetics Dream Drawer Beauty Gift Set",gbp:15,code:"8561390",v:0},
+{name:"Habitat Pendel Electric Light Fitting Black 1.2M",gbp:9,code:"9375468",v:0},
+{name:"Habitat 6ft Green Natural Look Slim Christmas Tree",gbp:60,code:"8562045",v:0},
+{name:"Ultimate Relaxing Toiletry Collection Gift Set",gbp:22,code:"8562148",v:0},
+{name:"LEGO Speed Champions Ken Block's '65 Ford Mustang Hoonicorn V1 77262",gbp:23,code:"8564081",v:0},
+{name:"Shark DePuffi Contrast Therapy Sculpting Tool - Warm Black",gbp:179.99,code:"7750841",v:0},
+{name:"Argos Home 4 Seater Garden Sofa Set",gbp:280,code:"7751091",v:0},
+{name:"LEGO Friends Puppy Playground Toy with Pet Dog Figures 42665",gbp:9,code:"7751572",v:0},
+{name:"LEGO Marvel Spider-Man vs. Hulk Epic Clash Set 76350",gbp:80,code:"8565585",v:0},
+{name:"Shark FacialPro Glow + DePuffi at Home Facial - Warm Black",gbp:299.99,code:"7752519",v:0},
+{name:"STYLPRO Wavelength Pro 5-in-1 Deep LED Face Mask",gbp:200,code:"7758537",v:0},
+{name:"Ninja CRISPi DualZone 7.6L Air Fryer – Bone",gbp:299.99,code:"9838479",v:0},
+{name:"Sage SES876BSS4G The Barista Express Impress Espresso Coffee Machine",gbp:729.95,code:"7761287",v:0},
+{name:"Shark FlexStyle Glacial Blue 6-in-1 Air Styler & Hair Dryer",gbp:329.99,code:"7761768",v:0},
+{name:"Toshiba 55 Inch 55QV1563DB Smart 4K UHD HDR QLED Freely TV",gbp:349,code:"7763278",v:0},
+{name:"Bosch Series 4 MAF462B0GB 6.1L Air Fryer – Black",gbp:99.99,code:"7766392",v:0},
+{name:"Sensse Skinlift Device",gbp:24.99,code:"7767171",v:0},
+{name:"LEGO Creator 3in1 Wild Animals: Tropical Toucan Set 31173",gbp:13,code:"7769629",v:0},
+{name:"Ninja AF110UK 4.7L Air Fryer - Grey",gbp:89.99,code:"7769698",v:0},
+{name:"PULSE Elite Wireless PS5 Headset - White",gbp:119.99,code:"4883144",v:0},
+{name:"Habitat Boulle Japonais 37cm Steel Paper Table Lamp - White",gbp:12,code:"4888943",v:0},
+{name:"Habitat 7ft Natural Look Upswept Mixed Tip Christmas Tree",gbp:140,code:"9394133",v:0},
+{name:"Rio Facial Sauna & Steamer with Steam Inhaler",gbp:25,code:"8581789",v:0},
+{name:"Aspire Essential Foam Free Bonnell Spring Mattress",gbp:109,code:"9846131",v:0},
+{name:"Habitat 6ft Pre lit Blue Oscar With Pine Cone Christmas Tree",gbp:75,code:"8587154",v:0},
+{name:"LEGO Botanicals Cosmos Flowers Building Set 11514",gbp:13,code:"8591157",v:0},
+{name:"Chad Valley Shopping Trolley Playset",gbp:12,code:"8591401",v:0},
+{name:"Radiance Lava Lamp 17in - Orange & Violet",gbp:25,code:"8591463",v:0},
+{name:"Shark Classic Lift-Away Pet Corded Upright Vacuum Cleaner",gbp:240,code:"8591683",v:0},
+{name:"Habitat Cotton 200 TC Plain Forest Green Pillowcase Pair",gbp:10,code:"8593193",v:0},
+{name:"LEGO NINJAGO Lloyd's Dragon Mech Battle Pack Ninja Toy 71862",gbp:9,code:"8593296",v:0},
+{name:"LEGO Creator 3 in 1 Floral Decor Perfume Bottle Set 31383",gbp:25,code:"8594099",v:0},
+{name:"LEGO Speed Champions The Fast and The Furious Toyota Supra MK4 77260",gbp:23,code:"8595940",v:0},
+{name:"Argos Home Floral Print Pink Bedding Set",gbp:10,code:"8598095",v:0},
+{name:"Argos Home Mini Votive Boxed Candle - Christmas Spice",gbp:2.5,code:"8598253",v:0},
+{name:"Silentnight Travis Miracoil Microquilt Mattress",gbp:189,code:"6976956",v:0},
+{name:"Belkin SoundForm Dot True Wireless Earbuds - Black",gbp:19.99,code:"9866771",v:0},
+{name:"Disney Minnie Mouse Standing Plush Christmas Decoration",gbp:20,code:"7791051",v:0},
+{name:"Ninja Prestige DualBrew CFN802UK Filter & Pod Coffee Machine",gbp:259.99,code:"7793396",v:0},
+{name:"Ninja AF170UK 6.2L Air Fryer - Black",gbp:99.99,code:"7793729",v:0},
+{name:"Maxx Tech MX40 LED Gaming Headset PS5, PS4, Xbox, Switch, PC",gbp:12.99,code:"7796087",v:0},
+{name:"Old Spice Treasure Chest Gift Set",gbp:22,code:"7797787",v:0},
+{name:"McGregor 16L Wet and Dry Vacuum Cleaner",gbp:50,code:"7798401",v:0},
+{name:"Tikkers Kids Black Smart Watch And Over-Ear Headphone Set",gbp:30,code:"7798418",v:0},
+{name:"Dyson Ball Animal Origin Bagless Upright Vacuum Cleaner",gbp:279.99,code:"9875896",v:0},
+{name:"Habitat 7ft Pre lit Nordland Christmas Tree",gbp:55,code:"6991759",v:0},
+{name:"Habitat Kids White Transport Printed Lampshape - 25cm",gbp:8,code:"3103296",v:0},
+{name:"JAY-BE Eco Friendly E- Spring Kids Single Bunk Mattress",gbp:82.99,code:"3103423",v:0},
+{name:"De'Longhi 350ml Milk Jug - Brushed Stainless Steel",gbp:16,code:"3111123",v:0},
+{name:"Habitat Stockholm Stripe Neutral Bedding Set",gbp:10,code:"3111264",v:0},
+{name:"Ninja Foodi FlexDrawer AF500UK 10.4L Air Fryer - Black",gbp:209.99,code:"3117488",v:0},
+{name:"Armani Exchange Men's Silver Coloured Stainless Steel Watch",gbp:90,code:"3122143",v:0},
+{name:"Philips Spray Bathroom Luminaire LED Ceiling Light - Silver",gbp:25.2,code:"3127935",v:0},
+{name:"Philips LED Moire Indoor Ceiling Light - White",gbp:9,code:"3127959",v:0},
+{name:"LEGO Creator 3 in 1 Magical Unicorn Toy Animal Playset 31140",gbp:9,code:"3128642",v:0},
+{name:"Beats Studio Pro ANC Over-Ear Wireless Headphones - Black",gbp:249.95,code:"3131512",v:0},
+{name:"Fisher Price Little People Big ABC Animal Train Toy",gbp:30,code:"3139246",v:0},
+{name:"Habitat 6ft Imperial Christmas Tree",gbp:18,code:"2328986",v:0},
+{name:"SilentNight Ashley Kids Healthy Growth Open Coil Mattress - Single",gbp:185,code:"3148512",v:0},
+{name:"JAY-BE Pocket Sprung Kids Single Mattress",gbp:104.25,code:"8100610",v:0},
+{name:"Vax Air Stretch Max Pet Corded Upright Vacuum Cleaner",gbp:80,code:"8109817",v:0},
+{name:"STYLPRO LED Wavelength Face Mask",gbp:100,code:"3151509",v:0},
+{name:"Habitat Stockholm Stripe Blue & White Bedding Set",gbp:10,code:"3158069",v:0},
+{name:"LEGO Harry Potter Hogwarts Castle Sorting Hat Ceremony 76460",gbp:13,code:"8111654",v:0},
+{name:"Argos Home Rica Ceramic Table Lamp",gbp:8,code:"8112385",v:0},
+{name:"De'Longhi Stilosa Espresso Coffee Machine EC230.BK",gbp:90,code:"8112969",v:0},
+{name:"Hoover HL4 Pet Upright Vacuum Cleaner Lightweight Bagless HEPA filter",gbp:149,code:"8113425",v:0},
+{name:"Argos Home Kids Pink Butterflies Lampshade - 25cm",gbp:16,code:"8113504",v:0},
+{name:"Rio Ultimate Beauty Storage Vanity Case",gbp:60,code:"8114833",v:0},
+{name:"Samsung Galaxy Buds4 Pro True Wireless Earbuds - Black",gbp:169,code:"8117146",v:0},
+{name:"Hoover HF1 Max Flexi Cordless Vacuum Cleaner Stick Long Runtime LED",gbp:149.99,code:"8119993",v:0},
+{name:"LEGO Speed Champions Mercedes-AMG F1 W15 Race Car Toy 77244",gbp:23,code:"7310047",v:0},
+{name:"Tikkers Kids Navy Series 13 Smart Watch",gbp:25,code:"7311840",v:0},
+{name:"Bush 50 Inch 50QSF26 Smart 4K UHD HDR QLED Freely Fire TV",gbp:279,code:"7312564",v:0},
+{name:"X Rocker Alpha Fabric Office Gaming Chair - Beige",gbp:128,code:"7314263",v:0},
+{name:"LG 24 Inch 24LB70006LA Smart Full HD HDR LED AI TV",gbp:179.99,code:"8130800",v:0},
+{name:"LG 50 Inch 50NU8E0B3LA Smart 4K UHD HDR LED Nano AI TV",gbp:309.99,code:"8134851",v:0},
+{name:"LEGO Technic John Deere 1470H Wheeled Harvester Toy 42218",gbp:9,code:"8136945",v:0},
+{name:"LEGO Marvel Miles Morales Mech vs. Spider-Man 2099 - 76337",gbp:13,code:"8137944",v:0},
+{name:"Hoover HF1 Max Cordless Vacuum Cleaner Stick Long Runtime LED Lights",gbp:89,code:"8139588",v:0},
+{name:"Argos Home Dalham Memory Mattress",gbp:200,code:"6513986",v:0},
+{name:"Gtech AirRam 2 K9 Cordless Upright Vacuum Cleaner",gbp:280,code:"6517652",v:0},
+{name:"Science Mad Night Vision Goggles",gbp:17,code:"5256440",v:0},
+{name:"Turtle Beach Recon 70 PS5, PS4, Xbox, PC Headset",gbp:29.99,code:"5258187",v:0},
+{name:"Habitat Mopsa Clip Lamp",gbp:19,code:"9405338",v:0},
+{name:"Habitat Varro White Paper Easy Fit Lampshade - 47cm",gbp:8,code:"9405383",v:0},
+{name:"Vax Air Stretch Corded Bagless Upright Vacuum Cleaner",gbp:100,code:"9406117",v:0},
+{name:"Siemens TE651209GB EQ6 Bean To Cup Coffee Machine",gbp:999,code:"9407240",v:0},
+{name:"LEGO Speed Champions McLaren F1 Team MCL38 Race Car 77251",gbp:23,code:"7331758",v:0},
+{name:"Fuchsia Mirage Lava Lamp 14.5in - Pink & Violet",gbp:20,code:"7334061",v:0},
+{name:"Chad Valley Wooden Train",gbp:6,code:"7335682",v:0},
+{name:"Home Essentials Soft Touch Plain Fitted Sheet",gbp:4.5,code:"7336430",v:0},
+{name:"Argos Home Brushed Cotton Landscape Grey Bedding Set",gbp:13.33,code:"7336894",v:0},
+{name:"Argos Home Collect Now Memory Rolled Mattress",gbp:185,code:"5710845",v:0},
+{name:"Habitat Cotton Rich 180TC Standard Pillowcase Pair - Neutral",gbp:6,code:"7339389",v:0},
+{name:"Limit Ladies' Gold Plated Bracelet, Pendant and Watch Set",gbp:20,code:"2835008",v:0},
+{name:"Armani Exchange Men's Stainless Steel Bracelet Watch Set",gbp:100,code:"9416444",v:0},
+{name:"JLab JBuds Pro In-Ear Headphones - Black",gbp:9.99,code:"8154367",v:0},
+{name:"Casio Unisex Analogue Black Dial Black Resin Strap Watch",gbp:16,code:"7343959",v:0},
+{name:"Habitat Cotton Jersey Little Dino Nursery Twin Fitted Sheet",gbp:14,code:"4460165",v:0},
+{name:"Argos Home Faux Leather Mid Back Gaming Chair - Black",gbp:53,code:"6088734",v:0},
+{name:"JLab GO Air Pop In-Ear True Wireless Earbuds - White",gbp:24.99,code:"4461731",v:0},
+{name:"JLab JBuddies Pop Kids Wired On Ear Headphones - Blue",gbp:9.99,code:"4461793",v:0},
+{name:"LEGO Fortnite Supply Llama Video Game Toy Gaming Gift 77071",gbp:25,code:"4464628",v:0},
+{name:"LEGO Creator 3in1 Wild Animals: Surprising Spider Toy 31159",gbp:11,code:"4465270",v:0},
+{name:"Habitat Gloss Glass Table Lamp",gbp:21,code:"4466231",v:0},
+{name:"LEGO NINJAGO Zane's Battle Suit Mech Ninja Toy Set 71827",gbp:9,code:"4466932",v:0},
+{name:"LEGO Marvel Spider-Man Mech vs. Anti-Venom Marvel Gift 76308",gbp:13,code:"4467584",v:0},
+{name:"Rio Spa PEDI Foot File",gbp:25,code:"4468002",v:0},
+{name:"Belkin SoundForm Mini Kids Wired On-Ear Headphones - Pink",gbp:14.99,code:"2843368",v:0},
+{name:"Belkin SoundForm Mini Kids Wired On-Ear Headphones - Blue",gbp:14.99,code:"2843375",v:0},
+{name:"Tassimo by Bosch Joy Pod Coffee Machine - Black",gbp:60,code:"2393863",v:0},
+{name:"LEGO Minecraft The Creeper Action Figure Building Set 21276",gbp:35,code:"7802397",v:0},
+{name:"JML Smart Sconce Wireless Wall Light - Chrome",gbp:19.99,code:"7802634",v:0},
+{name:"Tikkers Teen Series 13 Pink Smart Watch and Earbud Set",gbp:32,code:"7803396",v:0},
+{name:"Aspire Kids Dual Layer Open Coil Mattress - Single",gbp:88,code:"7353080",v:0},
+{name:"Aspire Kids Hybrid 1000 Pocket Sprung Mattress - Single",gbp:136,code:"7353138",v:0},
+{name:"Old Spice Captain Travel Bag Gift Set",gbp:15,code:"7806829",v:0},
+{name:"Tassimo TCZ6008 Descaling Tablets",gbp:12,code:"9432820",v:0},
+{name:"LEGO Star Wars Clone Shock Trooper Mech Building Toy 75448",gbp:13,code:"8171584",v:0},
+{name:"Bush 40 Inch 40FSF26 Smart FHD Freely Fire TV",gbp:179,code:"8173290",v:0},
+{name:"Habitat Onion Shaped Mercury Gold Glass Christmas Bauble - Pack of 9",gbp:8,code:"8173630",v:0},
+{name:"Bush 55 Inch 55USF26 Smart 4K UHD HDR Freely Fire TV",gbp:279,code:"8176194",v:0},
+{name:"Bush 43 Inch 43USF26 Smart 4K UHD HDR Freely Fire TV",gbp:199,code:"8176620",v:0},
+{name:"JML Smart Sconce Wireless Wall Light - Black",gbp:19.99,code:"7813977",v:0},
+{name:"LEGO Marvel Mech Battle: Spider-Man vs. Doc Ock Set 76338",gbp:18,code:"8177492",v:0},
+{name:"Tikkers Teen Series 13 Black Smart Watch and Earbuds Set",gbp:35,code:"7815803",v:0},
+{name:"LEGO Speed Champions Lightning McQueen Car Toy 77255",gbp:23,code:"8179713",v:0},
+{name:"Casio Vintage Green Dial Stainless Steel Bracelet Watch",gbp:26,code:"7816084",v:0},
+{name:"Habitat Mid Century Pleated Column Table Lamp - Yellow",gbp:23,code:"8180252",v:0},
+{name:"Casio Illuminator Black Resin Strap Watch",gbp:26,code:"8180427",v:0},
+{name:"Chad Valley Wooden Afternoon Tea Set",gbp:12,code:"8181206",v:0},
+{name:"Bush 32 Inch 32HSF26 Smart HD Ready Freely Fire TV",gbp:139,code:"8182188",v:0},
+{name:"Argos Home 8 Seater Modern Space Saving Patio Set- Charcoal",gbp:450,code:"7822274",v:0},
+{name:"STEALTH C6-100 Gaming Headset PS4 Xbox, Switch, PC - White",gbp:14.99,code:"7823620",v:0},
+{name:"Bush 65 Inch 65USF26 Smart 4K UHD HDR Freely Fire TV",gbp:369,code:"8187925",v:0},
+{name:"Gioteck TX5+ PS5, PS4, Xbox, Switch, PC Gaming Headset Black",gbp:19.99,code:"7824416",v:0},
+{name:"Therabody TheraFace Mask Glo LED Skincare Mask",gbp:299,code:"7824715",v:0},
+{name:"LEGO Creator 3in1 Fierce Dinosaur Figure Building Toy 31379",gbp:20,code:"8189978",v:0},
+{name:"Tassimo by Bosch Finesse Friendly Pod Coffee Machine - Cream",gbp:90,code:"4490472",v:0},
+{name:"Shark CryoGlow Under-Eye Cooling LED Face Mask - Lilac",gbp:299.99,code:"4498728",v:0},
+{name:"Nespresso by De'Longhi CitiZ Pod Coffee Machine - White",gbp:175,code:"4499239",v:0},
+{name:"Apple AirPods 5 with Wireless Charging Case",gbp:139,code:"9900431",v:0},
+{name:"JAY-BE Open Coil Foam Free Toddler Mattress",gbp:59.32,code:"8641409",v:0},
+{name:"Apple Watch Series 12 GPS + Cell Aluminium Case with Sport Band",gbp:469,code:"9907915",v:0},
+{name:"Belkin SoundForm ActiveFit Wireless Sports Earbuds - Black",gbp:29.99,code:"7833861",v:0},
+{name:"Habitat Pure Cotton 200TC Standard Pillowcase Pair",gbp:10,code:"8198402",v:0},
+{name:"Argos Home Swirled LED Flush Ceiling Light - Black",gbp:25,code:"7835168",v:0},
+{name:"Casio Digital Illuminator Black Resin Strap Watch",gbp:24,code:"8199236",v:0},
+{name:"Vax Air Lift Steerable Max Pet Corded Upright Vacuum Cleaner",gbp:95,code:"8199889",v:0},
+{name:"Silentnight Hatfield Memory Foam Mattress",gbp:249,code:"5762518",v:0},
+{name:"LG 43Inch 43LR60006LA Smart FHD HDR LED TV",gbp:219.99,code:"7842467",v:0},
+{name:"Vax LiftOut Corded Bagless Upright Vacuum Cleaner",gbp:118,code:"7845402",v:0},
+{name:"Vax LiftOut Reach Pet Corded Bagless Upright Vacuum Cleaner",gbp:239,code:"7845419",v:0},
+{name:"Hisense 75 Inch 75E6QTUK Smart 4K UHD HDR LED Freely TV",gbp:549,code:"7847967",v:0},
+{name:"Ninja Foodi MAX 15-in-1 SmartLid 7.5L Multi Cooker Air Fryer",gbp:320,code:"9473250",v:0},
+{name:"Argos Home 4ft Christmas Tree",gbp:10,code:"9476848",v:0},
+{name:"Logitech H151 Stereo PC Headset - Black",gbp:17.99,code:"8663872",v:0},
+{name:"Sony WF-C510 True Wireless Earbuds - Blue",gbp:39.99,code:"7850813",v:0},
+{name:"Argos Home Serenity 2 Seater Metal Garden Bistro Set - Green",gbp:45,code:"7855942",v:0},
+{name:"Chad Valley Baby Bear Piano",gbp:12,code:"7865592",v:0},
+{name:"Habitat Wooden Garden Sofa Set",gbp:650,code:"7867253",v:0},
+{name:"Habitat Polycotton Extra Deep Fitted Sheet",gbp:10,code:"5791572",v:0},
+{name:"X Rocker Arteon RGB eSports Compact Junior Gaming Chair",gbp:127,code:"5793460",v:0},
+{name:"Argos Home Elmdon Open Coil Deep Ortho Mattress",gbp:145,code:"4982296",v:0},
+{name:"eufy X10 Pro Omni Robot Vacuum & Mop with All-in-One Station",gbp:399,code:"5796948",v:0},
+{name:"Bush Bagged Cylinder Corded Vacuum Cleaner",gbp:50,code:"5797129",v:0},
+{name:"Bush Bagless Cylinder Corded Vacuum Cleaner",gbp:40,code:"5797222",v:0},
+{name:"Bush Bagless Cylinder Pet Corded Vacuum Cleaner",gbp:70,code:"5797246",v:0},
+{name:"Xtralite LED Rechargeable Sensor Light - White",gbp:18.5,code:"5798104",v:0},
+{name:"X Rocker Adrenaline RGB Stereo Gaming chair with LED Light",gbp:143,code:"5799299",v:0},
+{name:"X Rocker Bolero RGB LED Stereo Audio Chair",gbp:121,code:"5799529",v:0},
+{name:"X Rocker Chimera MK2 RGB Sync Junior Floor Rocker - Black",gbp:71,code:"5799536",v:0},
+{name:"STYLPRO 4-in-1 Facial Steamer",gbp:35,code:"9494772",v:0},
+{name:"Sony WH-CH735N Over-Ear Noise-Cancelling Wireless Headphones - Black",gbp:99.99,code:"9950656",v:0},
+{name:"Apple Watch Ultra 4 GPS + Cell Titanium Case with Milanese Loop",gbp:849,code:"9952692",v:0},
+{name:"Hisense 900W 4 in 1 Air Fryer with Microwave and Grill H23MOBS5HCUK - Black",gbp:190,code:"8692427",v:0},
+{name:"Samsung 43 Inch UE43U7000HKXXU Smart 4K UHD HDR Crystal TV",gbp:249,code:"8695170",v:0},
+{name:"Samsung 43 Inch UE43U8000HKXXU Smart 4K UHD HDR Crystal TV",gbp:259,code:"8695187",v:0},
+{name:"Samsung 50 Inch UE50U7000HKXXU Smart 4K UHD HDR Crystal TV",gbp:289,code:"8695297",v:0},
+{name:"Samsung 50 Inch UE50U8000HKXXU Smart 4K UHD HDR Crystal TV",gbp:299,code:"8695307",v:0},
+{name:"Samsung 55 Inch UE55U8000HKXXU Smart 4K UHD HDR Crystal TV",gbp:349,code:"8695369",v:0},
+{name:"Samsung 55 Inch UE55U7000HKXXU Smart 4K UHD HDR Crystal TV",gbp:339,code:"8695390",v:0},
+{name:"Samsung 58 Inch UE58U8000HKXXU Smart 4K UHD HDR Crystal TV",gbp:379,code:"8695534",v:0},
+{name:"Samsung 65 Inch UE65U7000HKXXU Smart 4K UHD HDR Crystal TV",gbp:469,code:"8695541",v:0},
+{name:"Home Essentials Ceramic Table Lamp",gbp:6,code:"8696966",v:0},
+{name:"Samsung 65 Inch UE65U8000HKXXU Smart 4K UHD HDR Crystal TV",gbp:469,code:"8697604",v:0},
+{name:"Dolce Gusto Piccolo XS Pod Coffee Machine",gbp:29.99,code:"8699633",v:0},
+{name:"Apple Watch Ultra 4 GPS + Cell Titanium Case with Alpine Loop",gbp:749,code:"9963629",v:0},
+{name:"Apple Watch Series 12 GPS Aluminium Case with Sport Band",gbp:369,code:"9966884",v:0},
+{name:"Logitech G321 LIGHTSPEED Wireless Gaming PC Headset - Black",gbp:49.99,code:"7899599",v:0},
+{name:"SteelSeries Arctis Nova 1 Xbox,PC,PS5,Switch Gaming Headset",gbp:39.99,code:"1122358",v:0},
+{name:"SteelSeries Arctis Nova 1P PS5, Switch, PC Gaming Headset",gbp:39.99,code:"1122365",v:0},
+{name:"De'Longhi Mag Start ECAM22022GB Automatic Coffee Machine",gbp:320,code:"1123759",v:0},
+{name:"De'Longhi ECAM290.21.B Mag Evo Bean to Cup Coffee Machine",gbp:350,code:"1123766",v:0},
+{name:"JLAB GO Air Sport True Wireless Earbuds – Teal",gbp:29.99,code:"1124404",v:0},
+{name:"Limit Easy Read Black Silicone Strap Watch",gbp:10,code:"1126031",v:0},
+{name:"Limit Easy Read Green Silicone Strap Watch",gbp:10,code:"1126048",v:0},
+{name:"Ninja Pro AF140UK 4.7L Air Fryer - Black",gbp:89.99,code:"4014016",v:0},
+{name:"Argos Home 32 Tassimo Coffee Pod Holder",gbp:10,code:"3201215",v:0},
+{name:"LG 32 Inch 32LR60006LA Smart FHD HDR LED Freeview TV",gbp:169.99,code:"4017068",v:0},
+{name:"Nespresso Vertuo Pop Pod Coffee Machine by Krups - White",gbp:54.99,code:"1133907",v:0},
+{name:"Tomy Hide and Squeak Eggs Activity Toy",gbp:10,code:"4028868",v:0},
+{name:"Silentnight 3 Zone Memory Foam Rolled Mattress Medium Firm - Small Double",gbp:178,code:"3227268",v:0},
+{name:"Habitat 6ft Pre lit Snowy Slim Christmas Tree",gbp:40,code:"5319624",v:0},
+{name:"Turtle Beach Recon 50X Xbox, PS5, PS4, PC Headset",gbp:19.99,code:"4506696",v:0},
+{name:"X Rocker Alpha Fabric Office Gaming Chair - Grey",gbp:128,code:"3244186",v:0},
+{name:"Argos Home Paint Splash Graffiti Kids Bedding Set",gbp:9,code:"3244801",v:0},
+{name:"Argos Home Kids Pink Unicorn Bedding Set",gbp:12,code:"3249198",v:0},
+{name:"Dolce Gusto Genio S by De'Longhi, EDG225.A Pod Machine",gbp:55,code:"1172315",v:0},
+{name:"Argos Home Check Blue & White Bedding Set",gbp:10.72,code:"8203524",v:0},
+{name:"Silentnight Miracoil Pillowtop Mattress",gbp:269,code:"1175903",v:0},
+{name:"Henry Pet Corded Bagged Cylinder Vacuum Cleaner",gbp:139.99,code:"8208275",v:0},
+{name:"Limit Ladies Glow Dial Gold Plated Strap Watch",gbp:10,code:"9024056",v:0},
+{name:"Rio Professional Makeup Chair",gbp:90,code:"8212577",v:0},
+{name:"X Rocker Adrenaline RGB 2.1 Bluetooth Console Gaming Chair with LED - Black",gbp:179.99,code:"8213954",v:0},
+{name:"JLab GO Air Pop In-Ear True Wireless Earbuds - Black",gbp:24.99,code:"1188567",v:0},
+{name:"JLab GO Air Pop In-Ear True Wireless Earbuds - Slate",gbp:24.99,code:"1188574",v:0},
+{name:"JLab GO Air Pop In-Ear True Wireless Earbuds - Teal",gbp:24.99,code:"1188581",v:0},
+{name:"JLab GO Air Pop In-Ear True Wireless Earbuds - Lilac",gbp:24.99,code:"1188598",v:0},
+{name:"Karcher WD 2 Plus Wet & Dry Corded Vacuum Cleaner",gbp:63,code:"1189236",v:0},
+{name:"Bush 24 Inch 24HSF26 Smart HD Ready Freely Fire TV",gbp:119,code:"8217565",v:0},
+{name:"LEGO Friends Axolotl Adventure Boat Toy with Animals 42681",gbp:9,code:"8217572",v:0},
+{name:"LEGO Marvel Spidey on his Motorcycle vs. Rhino Toy 11206",gbp:9,code:"8218519",v:0},
+{name:"Bica Baltimore Stackable Garden Bistro Set - Green",gbp:32.5,code:"8219116",v:0},
+{name:"LEGO Creator 3in1 Turtle with a Water Lily Flower Toy 31377",gbp:9,code:"8219295",v:0},
+{name:"Dolce Gusto Piccolo XS by De'Longhi Pod Coffee Machine",gbp:30,code:"8219635",v:0},
+{name:"Hoover HP1 Bagless Cylinder Compact Lightweight Vacuum Cleaner",gbp:69,code:"4071853",v:0},
+{name:"Shark CryoGlow Under-Eye Cooling LED Face Mask – Blue",gbp:299.99,code:"4072144",v:0},
+{name:"Shokz OpenRun Pro 2 Wireless Bluetooth Headphones - Black",gbp:169,code:"4074252",v:0},
+{name:"Ninja ES701UK Luxe Cafe Pro Espresso Coffee Machine",gbp:579.99,code:"4074984",v:0},
+{name:"Ninja ES601UK Luxe Cafe Premier Espresso Coffee Machine",gbp:479.99,code:"4074991",v:0},
+{name:"Razer BlackShark V2 X Wired Console Gaming Headset - Black",gbp:44.99,code:"4075110",v:0},
+{name:"Siemens EQ700 TP713GB9 Bean to Cup Coffee Machine",gbp:1300,code:"4076047",v:0},
+{name:"Radox Revive Self-Care Collection Gift Set",gbp:6.6,code:"4076504",v:0},
+{name:"Habitat Geometric ZigZag Pattern Multicolour Bedding Set",gbp:16,code:"4529257",v:0},
+{name:"Miele Guard S1 Bagged Cylinder Corded Vacuum Cleaner",gbp:199,code:"4529783",v:0},
+{name:"Bluey Toy Doctor Set",gbp:10,code:"3266205",v:0},
+{name:"Galt Explosive Experiments",gbp:18,code:"3266580",v:0},
+{name:"eKids Gabby's Dollhouse Kids Bluetooth Headphones",gbp:30,code:"3267826",v:0},
+{name:"De'Longhi EcoDecalk 500ml Descaler",gbp:8.4,code:"3268564",v:0},
+{name:"LEGO Speed Champions Aston Martin Aramco F1 Toy Car 77245",gbp:23,code:"7416202",v:0},
+{name:"Reflex Active Spectra Series 40 AMOLED Calling Smart Watch",gbp:40,code:"7417830",v:0},
+{name:"Sekonda Edition Ladies Silver Mesh Bracelet Watch",gbp:25,code:"6609292",v:0},
+{name:"Sekonda Men's Gold Plated Case Brown Leather Strap Watch",gbp:20,code:"4087610",v:0},
+{name:"Science Mad Digital Metal Detector",gbp:25,code:"2912426",v:0},
+{name:"Argos Home 3ft Small Christmas Tree",gbp:6,code:"2912512",v:0},
+{name:"LEGO Creator 3 in 1 Exotic Parrot Animals Building Toy 31136",gbp:20,code:"2913236",v:0},
+{name:"Vtech Nursery Rhymes Book",gbp:10,code:"9047019",v:0},
+{name:"Lorus Men's Chronograph Brown Leather Strap Watch",gbp:33.5,code:"6162485",v:0},
+{name:"Argos Home Concrete Parasol Base - Black",gbp:35,code:"7428805",v:0},
+{name:"Lorus Men's Stainless Steel Blue Dial Bracelet Watch",gbp:33.5,code:"6169763",v:0},
+{name:"Bose QuietComfort True Wireless Earbuds - Black",gbp:179.95,code:"4092227",v:0},
+{name:"Astro A50 Gen 5 Wireless Xbox, PS5, PC Gaming Headset Black",gbp:199.99,code:"4092708",v:0},
+{name:"Astro A50 Gen 5 Wireless Xbox, PS5, PC Gaming Headset White",gbp:199.99,code:"4092722",v:0},
+{name:"Astro A50 X Wireless Gaming Headset for Xbox X/S, PS5 and PC",gbp:279.99,code:"4092801",v:0},
+{name:"Belkin Soundform Clearfit Open-Ear Wireless Earbuds – Black",gbp:39.99,code:"4543350",v:0},
+{name:"Tower T17151 Vortx Dual Basket 8L Air Fryer - Black",gbp:79.99,code:"4093075",v:0},
+{name:"Shark CryoGlow Led Mask Charging Stand",gbp:49.99,code:"4544964",v:0},
+{name:"Habitat Mushroom Glass Table Lamp",gbp:12,code:"4094177",v:0},
+{name:"De'Longhi ECAM320.60.B Mag Plus Bean to Cup Coffee Machine",gbp:700,code:"3281534",v:0},
+{name:"Minecraft Glow in the Dark Kids Bedding Set - Single",gbp:22,code:"4095839",v:0},
+{name:"Disney Princess Enchanting Train Make Up Case",gbp:29,code:"4096216",v:0},
+{name:"Habitat Caliban Globe Glass Table Lamp",gbp:21,code:"4097899",v:0},
+{name:"Jay-Be Rollaway & Grand Folding Guest Bed Cover - Single",gbp:30,code:"4548472",v:0},
+{name:"Shark PowerDetect Corded Stick Vacuum Cleaner HZ4000UKT",gbp:215,code:"4548881",v:0},
+{name:"Shark Anti Hair Wrap Plus Pet Upright Corded Vacuum Cleaner",gbp:220,code:"4548898",v:0},
+{name:"Home Kids Cotton Jersey 2 Pack Fitted Sheets",gbp:9,code:"9501421",v:0},
+{name:"Tefal EY245B40 Easy Fry Max 5L Touchscreen Air Fryer Grey",gbp:59,code:"3288568",v:0},
+{name:"Casio G-SHOCK Men's Black Resin Strap Watch",gbp:86,code:"2926175",v:0},
+{name:"Argos Home Plain White Fitted Sheet",gbp:4,code:"8245489",v:0},
+{name:"Argos Home 2 Seater Rattan Effect Garden Bistro Set - Brown",gbp:60,code:"7436244",v:0},
+{name:"Vax Mach Air Revive Corded Bagless Upright Vacuum Cleaner",gbp:65,code:"7439715",v:0},
+{name:"Habitat 6ft Pre lit Mixed Cashmere Christmas Tree",gbp:70,code:"5812815",v:0},
+{name:"Turtle Beach Recon 50P PS5, PS4, Xbox, PC Headset",gbp:19.99,code:"4555647",v:0},
+{name:"GXTrust Quadrox Keyboard, Mouse, Headset & Mat Gaming Bundle",gbp:49.99,code:"3298929",v:0},
+{name:"Habitat Cotton Linen Plain Rust Bedding Set",gbp:33,code:"9513914",v:0},
+{name:"Sensse Energy Facial Cleanser",gbp:29.99,code:"9515280",v:0},
+{name:"Chad Valley PlaySmart Wooden Shape Sorter",gbp:10,code:"2489533",v:0},
+{name:"LEGO Creator 3in1 Space Exploration Telescope Toy 31378",gbp:30,code:"8254535",v:0},
+{name:"Chad Valley Wooden Learning Clock",gbp:12,code:"7441026",v:0},
+{name:"My Mini Baby Series 2 Bundles of Joy",gbp:10,code:"7441088",v:0},
+{name:"Argos Home Capybara Felt Hanging Christmas Decoration",gbp:5,code:"8258263",v:0},
+{name:"Tassimo by Bosch Happy Pod Coffee Machine - Black",gbp:29.99,code:"8709217",v:0},
+{name:"Shark CryoGlow Under-Eye Cooling LED Face Mask - Rose Glow",gbp:299.99,code:"8259657",v:0},
+{name:"Habitat Kids Rae Comfort Open Coil Mattress - Small Double",gbp:130,code:"7448751",v:0},
+{name:"LEGO Speed Champions Ferrari SF-24 F1 Race Car Toy 77242",gbp:23,code:"7449396",v:0},
+{name:"Sensse Professional LED Light Therapy Facial Mask",gbp:140,code:"5824731",v:0},
+{name:"Emma Original Lite Hybrid Mattress",gbp:195,code:"5827745",v:0},
+{name:"Emma Original Pro Hybrid Mattress",gbp:455,code:"5827965",v:0},
+{name:"Argos Home Devon Essentials Mattress",gbp:95,code:"4564793",v:0},
+{name:"SENSSE ELITE 8 light LED Face Mask",gbp:230,code:"4568328",v:0},
+{name:"SENSSE SILHOUETTE LED Neck Mask",gbp:130,code:"4568335",v:0},
+{name:"Sensse Firmify 3-in-1 Led Tool",gbp:112,code:"4568342",v:0},
+{name:"Casio Unisex Analogue White Dial Black Resin Strap Watch",gbp:13,code:"9073320",v:0},
+{name:"Nestledown 600 Pocket Memory Foam Mattress",gbp:209,code:"9524958",v:0},
+{name:"Mega Bloks 60 Piece First Builders Big Building Bag- Classic",gbp:10,code:"9082593",v:0},
+{name:"Mega Bloks 60 Piece First Builders Big Building Bag - Pastel",gbp:10,code:"9082603",v:0},
+{name:"Vax Pick Up Pet Corded Bagless Cylinder Vacuum Cleaner",gbp:90,code:"8723468",v:0},
+{name:"Argos Home Gingerbread Doormat",gbp:6.5,code:"8274395",v:0},
+{name:"Midnight Cascade Lava Lamp 17in - Blue",gbp:25,code:"7461422",v:0},
+{name:"Argos Home Steel Rechargeable Table Lamp",gbp:15,code:"7461549",v:0},
+{name:"Habitat Stockholm Stripe Bedding Set",gbp:10,code:"8276726",v:0},
+{name:"TCL 55 Inch 55C6K Smart 4K UHD HDR Mini LED TV",gbp:579,code:"7463097",v:0},
+{name:"Argos Home Swirl Glass Table Lamp - Green",gbp:28,code:"7914429",v:0},
+{name:"Habitat Cotton Rich Plain Chocolate Fitted Sheet",gbp:10,code:"7464625",v:0},
+{name:"LEGO Marvel Fantastic Four vs. Galactus Figure 76316",gbp:40,code:"7464687",v:0},
+{name:"LEGO NINJAGO Zilvar and Grimtak the Dragon Beast Toy 71863",gbp:18,code:"8731371",v:0},
+{name:"Dolce Gusto by De'Longh Piccolo XS Value Bundle Pod Coffee Machine",gbp:34.99,code:"8732253",v:0},
+{name:"Argos Home Mickey Mouse Themed Christmas Bauble - Pack of 6",gbp:5,code:"8734251",v:0},
+{name:"TCL 55 Inch 55P6L-UK Smart 4K UHD HDR Google TV",gbp:299,code:"8736929",v:0},
+{name:"TCL 65 Inch 65P6L-UK Smart 4K UHD HDR Google TV",gbp:399,code:"8736936",v:0},
+{name:"Toshiba 40 Inch 40LF2653DB Smart HD HDR Freely Fire TV",gbp:199,code:"8737148",v:0},
+{name:"X Rocker Arteon RGB Junior Esports Gaming Chair - Black/White",gbp:129.99,code:"8737193",v:0},
+{name:"Argos Home 2026 Painted Christmas Bauble",gbp:4,code:"8738453",v:0},
+{name:"Argos Home Compact Mesh Metal Gaming Chair - Black & Red",gbp:45,code:"8738831",v:0},
+{name:"Argos Home Open Coil Mattress",gbp:110,code:"8288680",v:0},
+{name:"Argos Home Brass Star Hanging Christmas Ornament",gbp:8,code:"8739933",v:0},
+{name:"Henry Bagged Corded Cylinder Vacuum Cleaner - Blue",gbp:129.99,code:"7926840",v:0},
+{name:"Shark CryoGlow Clinic Face and Body LED System White Gold",gbp:549.99,code:"9554904",v:0},
+{name:"Shark DePuffi Contrast Therapy Sculpting Tool - Peony Pink",gbp:179.99,code:"8291529",v:0},
+{name:"TCL 50 Inch 50V6D-UK Smart 4K UHD HDR DLED Freely Fire TV",gbp:279,code:"8742078",v:0},
+{name:"LEGO Friends Unicorn Cake Delivery Car Toy for Kids 42675",gbp:9,code:"7930018",v:0},
+{name:"Disney Kids Avengers Blue Bedding Set - Single",gbp:20,code:"8744980",v:0},
+{name:"Shark Flexology Anti Hair Wrap Corded Upright Vacuum Cleaner",gbp:160,code:"8294605",v:0},
+{name:"Argos Home Polycotton Floral Leaf Natural Bedding Set",gbp:10,code:"8294849",v:0},
+{name:"Argos Home 300L Multicolour Pickwick String Lights",gbp:22,code:"8746335",v:0},
+{name:"Samsung 24 Inch UE24F6000FK Smart Full HD HDR LED TV",gbp:149,code:"7482463",v:0},
+{name:"Samsung 27 Inch UE27F6000FK Smart Full HD HDR LED TV",gbp:159,code:"7482494",v:0},
+{name:"Samsung 32 Inch QE32LS03CBU The Frame Smart QLED TV",gbp:349,code:"7482528",v:0},
+{name:"Samsung 32 Inch UE32F6000FKXXU Smart Full HD HDR LED TV",gbp:169,code:"7482566",v:0},
+{name:"Samsung 32 Inch UE32H5020F Smart HD Ready HDR LED TV",gbp:149,code:"7482614",v:0},
+{name:"Habitat Wood and Brass Table Lamp - Walnut & Natural",gbp:36,code:"7482638",v:0},
+{name:"Samsung 40 Inch UE40F6000FK Smart Full HD HDR LED TV",gbp:199,code:"7482652",v:0},
+{name:"Argos Home 4ft Pre-lit Christmas Tree",gbp:18,code:"8296232",v:0},
+{name:"Nestledown Ortho Pocket Sprung Mattress",gbp:170,code:"8747901",v:0},
+{name:"Sensse Aura Pro Laser LED Hair Device",gbp:160,code:"8749734",v:0},
+{name:"Habitat Gold Metal Star Christmas Tree Topper",gbp:8,code:"7485680",v:0},
+{name:"Keter California 3-Seat Mini Sofa - Graphite",gbp:469,code:"8299600",v:0},
+{name:"Chad Valley Wooden Tea Set",gbp:12,code:"7486892",v:0},
+{name:"Home Essentials Soft Touch Standard Pillowcase Pair",gbp:2.75,code:"7488326",v:0},
+{name:"HUAWEI Band 10 Smart Watch",gbp:49.99,code:"7489844",v:0},
+{name:"Habitat Check Charcoal Grey Bedding Set",gbp:16,code:"9561155",v:0},
+{name:"Apple Watch Series 12 GPS 46mm Aluminium Case Bronze Milanese Loop - M/L",gbp:469,code:"9567252",v:0},
+{name:"LEGO ART Japanese Cherry Blossom Landscape Wall Art 31218",gbp:100,code:"7940709",v:0},
+{name:"LEGO City Police Car Toy for Kids 5+ Years Old 60312",gbp:9,code:"9568206",v:0},
+{name:"Shark CryoGlow Clinic LED Mask Light Therapy Device",gbp:379.99,code:"9568969",v:0},
+{name:"LEGO Speed Champions Back to the Future Time Machine 77256",gbp:23,code:"7942381",v:0},
+{name:"LEGO Botanicals Daisies - Artificial Flower Bouquet 11508",gbp:13,code:"7949212",v:0},
+{name:"TCL 43 Inch 43V6D-UK Smart 4K UHD HDR DLED Fire TV",gbp:249,code:"8761028",v:0},
+{name:"Dyson V12S Detect Slim Submarine Wet & Dry Cordless Vacuum Cleaner",gbp:369.99,code:"8761145",v:0},
+{name:"Tassimo by Bosch My Way 2 Pod Coffee Machine - Cream",gbp:100,code:"2998835",v:0},
+{name:"X Rocker Alpha Fabric Office Gaming Chair- Black",gbp:160,code:"8762151",v:0},
+{name:"Tower Vortx Elite T17138 10.4L Air Fryer - Grey",gbp:89.98,code:"2999982",v:0},
+{name:"Toshiba 32 Inch 32WF2653DB Smart FHD HDR Freely Fire TV",gbp:149,code:"8763428",v:0},
+{name:"Nivea Time to Indulge Skincare Gift Set",gbp:30,code:"8764238",v:0},
+{name:"Apple Watch Ultra 4 GPS + Cell Titanium Case with Ocean Band",gbp:749,code:"9578124",v:0},
+{name:"LEGO Friends Ice Cream & Balloon Stand with Bike Toy 42692",gbp:9,code:"7951695",v:0},
+{name:"LEGO Marvel Spider-Man vs. Ghost Rider Motorcycle 76335",gbp:9,code:"7954214",v:0},
+{name:"Marvel Spiderman Bluetooth Headphones",gbp:30,code:"7954348",v:0},
+{name:"Minecraft Kids Grey Bedding Set",gbp:18,code:"7955990",v:0},
+{name:"KPop Demon Hunters Kids Lilac Bedding Set - Single",gbp:20,code:"7956827",v:0},
+{name:"Body Collection 24-Day Advent Calendar Beauty Gift Set",gbp:36,code:"8772581",v:0},
+{name:"TCL 32 Inch 32V5DUK Smart Full HD HDR QLED Freely TV",gbp:189,code:"8772770",v:0},
+{name:"Nivea Time to Soothe Skincare Gift Set",gbp:18,code:"8773528",v:0},
+{name:"Bosch Series 4 MAFD490B7G Double Flex Drawer 10L Air Fryer with Tongs – Black",gbp:129.98,code:"9587256",v:0},
+{name:"Aspire Pocket Balance 1000 Pocket Sprung Mattress",gbp:215,code:"8776738",v:0},
+{name:"Samsung 50 Inch UE50M1EHAU Smart 4K UHD Mini LED TV",gbp:379,code:"8776893",v:0},
+{name:"Nestledown Sprung Mattress",gbp:119,code:"8779302",v:0},
+{name:"Samsung 43 Inch UE43M1EHAU Smart 4K UHD Mini LED TV",gbp:319,code:"8784294",v:0},
+{name:"Habitat Indu 2 Seater Metal Garden Bench - Green",gbp:130,code:"9598070",v:0},
+{name:"STEALTH C6 Wired Gaming Headset PS, Xbox, Switch & PC - PC Blue",gbp:14.99,code:"9598764",v:0},
+{name:"Tassimo by Bosch My Way 2 Pod Coffee Machine - Black",gbp:100,code:"8790202",v:0},
+{name:"Habitat Cotton Oxford Edge Stripe Denim Bedding Set",gbp:18,code:"7992094",v:0},
+{name:"LEGO Green Baseplate 11023",gbp:8,code:"2010342",v:0},
+{name:"Dyson Ball Animal Corded Bagless Upright Pet Vacuum Cleaner",gbp:199.99,code:"2027184",v:0},
+{name:"Argos Home Cow Parsley Blue & White Bedding Set",gbp:14,code:"1230233",v:0},
+{name:"Habitat Eve 2 Seater Metal Garden Bistro Set - Green",gbp:65,code:"1232516",v:0},
+{name:"Habitat Malta 4 Seater Rattan Effect Garden Bar Set",gbp:500,code:"1242245",v:0},
+{name:"HyperX Cloud Stinger 2 PC Wired Gaming Headset - Black",gbp:29.99,code:"1242410",v:0},
+{name:"Constant Quartz Men's Black Faux Leather Strap Watch",gbp:8,code:"2511195",v:0},
+{name:"Constant Ladies White Dial Black Strap Watch",gbp:8,code:"2511205",v:0},
+{name:"All Seasons 3m x 2m Pop Up Garden Gazebo - Navy Blue",gbp:144,code:"2062905",v:0},
+{name:"Argos Home Curico Metal 3 Light Flush Ceiling Light - Black",gbp:24,code:"2063155",v:0},
+{name:"LEGO Disney and Pixar 'Up' House Model Building Set 43217",gbp:50,code:"2070382",v:0},
+{name:"Disney Princess Triple Beauty Make Up Set",gbp:6.5,code:"2070461",v:0},
+{name:"LEGO Festive Gingerbread House Christmas Toy for Kids 40809",gbp:35,code:"9109562",v:0},
+{name:"Black + Decker Dustbuster 5.4Wh Handheld Vacuum Cleaner",gbp:25,code:"7035236",v:0},
+{name:"Argos Home Faux Leather Mid Back Gaming Chair - Blue & Black",gbp:53,code:"7037265",v:0},
+{name:"Casio Gold Stainless Steel Bracelet Watch",gbp:36,code:"2534361",v:0},
+{name:"Disney Frozen Kids Bedding Set - Single",gbp:20,code:"7042944",v:0},
+{name:"Chad Valley Caterpillar Stacking Game",gbp:10,code:"7044083",v:0},
+{name:"Argos Home 6 Seater Metal Patio Set - Light Grey",gbp:150,code:"7047138",v:0},
+{name:"CORSAIR TC100 RELAXED Gaming Chair - Black & Grey",gbp:184,code:"4161543",v:0},
+{name:"CORSAIR TC100 RELAXED Gaming Chair - Black",gbp:184,code:"4162614",v:0},
+{name:"Sony WF-C510 True Wireless Earbuds – White",gbp:39.99,code:"4163668",v:0},
+{name:"Samsung Galaxy Fit3 40mm Smart Watch",gbp:59,code:"4168168",v:0},
+{name:"Argos Home Tall Glass Table Lamp",gbp:16,code:"4169961",v:0},
+{name:"Silentnight 3 Zone Memory Foam Rolled Mattress Medium Firm - Double",gbp:192,code:"5435577",v:0},
+{name:"Casio Retro Blue Resin Strap Watch",gbp:12.7,code:"6252450",v:0},
+{name:"JBL Tune Beam 2 In-Ear True Wireless Earbuds - Black",gbp:39.99,code:"7519367",v:0}
+];
+
+/* ---- helpers ---- */
+const gbp = n => "£"+(Math.round(n*100)/100).toLocaleString("en-GB",{minimumFractionDigits:(n%1?2:0),maximumFractionDigits:2});
+const pts = (g,a) => Math.max(0, Math.round(100*(1-Math.abs(g-a)/a)));
+function cleanPrice(v){v=String(v).replace(/[^0-9.]/g,"");const i=v.indexOf(".");if(i>=0){v=v.slice(0,i+1)+v.slice(i+1).replace(/\./g,"");const d=v.split(".");if(d[1]!==undefined)v=d[0]+"."+d[1].slice(0,2);}return v;}
+const COLORS = ["#C8102E","#174A2B","#C9A646","#2B6CB0","#8F0A20","#B7791F","#2F855A","#6B46C1","#B83280","#2C7A7B"];
+const ROUND_MS = 25000;       // (legacy; no per-item timer now)
+const ROUNDS = 3;             // rounds per game
+const PER_ROUND = 6;          // items per round
+const TOTAL_N = ROUNDS*PER_ROUND;
+const randCode = () => String(Math.floor(1000+Math.random()*9000));
+const myId = (()=>{ try{let v=localStorage.getItem("argosId"); if(!v){v=Math.random().toString(36).slice(2,10); localStorage.setItem("argosId",v);} return v;}catch(e){return Math.random().toString(36).slice(2,10);} })();
+function shuffledOrder(){ const a=POOL.map((_,i)=>i); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+/* ---- firebase ---- */
+let DB=null, FB_OK=false, FB_ERR=null;
+try{
+  const cfg=window.ARGOS_FIREBASE_CONFIG;
+  if(cfg && cfg.apiKey && cfg.apiKey.indexOf("PASTE")<0 && window.firebase){
+    firebase.initializeApp(cfg); DB=firebase.database(); FB_OK=true;
+  } else { FB_ERR = window.firebase ? "not-configured" : "sdk-missing"; }
+}catch(e){ FB_ERR=String(e.message||e); }
+const roomRef = code => DB.ref("rooms/"+code);
+
+/* ---- small UI bits ---- */
+function Trevor({size=90,cls=""}){ return <div className={"floaty "+cls} style={{width:size,height:"auto"}} dangerouslySetInnerHTML={{__html:TREVOR_SVG}}/>; }
+function Btn({children,onClick,tone="gold",className="",disabled}){
+  const t={gold:"bg-[#C9A646] hover:bg-[#d8b85a] text-[#2a1e05] shadow-[0_3px_0_#9a7d2e]",
+    red:"bg-[#C8102E] hover:bg-[#d8233f] text-white shadow-[0_3px_0_#8F0A20]",
+    pine:"bg-[#174A2B] hover:bg-[#1c5c35] text-white shadow-[0_3px_0_#0d3019]",
+    ghost:"bg-white/10 hover:bg-white/20 text-white ring-1 ring-white/25"}[tone];
+  return <button onClick={onClick} disabled={disabled} className={"font-bold rounded-xl px-4 py-2.5 transition active:translate-y-[2px] active:shadow-none disabled:opacity-40 disabled:cursor-not-allowed "+t+" "+className}>{children}</button>;
+}
+function QR({text,size=150}){
+  const ref=useRef(null);
+  useEffect(()=>{ if(!window.qrcode||!ref.current)return;
+    try{const qr=window.qrcode(0,"M");qr.addData(text);qr.make();ref.current.innerHTML=qr.createSvgTag({cellSize:5,margin:1});
+      const s=ref.current.querySelector("svg");if(s){s.removeAttribute("width");s.removeAttribute("height");s.style.width="100%";s.style.height="100%";s.style.display="block";}}catch(e){}
+  },[text]);
+  return <div className="bg-white rounded-xl p-2 shadow-lg" style={{width:size,height:size}}><div ref={ref} style={{width:"100%",height:"100%"}}/></div>;
+}
+function imgUrl(code,v,size){ return "https://media.4rgos.it/i/Argos/"+code+(v===1?"_R_SET":"_R_Z001A")+"?w="+size+"&h="+size; }
+function ArgImg({code,v,size=600,className,alt=""}){
+  const [stage,setStage]=useState(0);
+  useEffect(()=>{setStage(0);},[code,v,size]);
+  if(stage>=2) return <div className="text-4xl">\uD83C\uDFF7\uFE0F</div>;
+  const useV=stage===0?v:(v===1?0:1);
+  return <img src={imgUrl(code,useV,size)} alt={alt} loading="lazy" className={className} onError={()=>setStage(s=>s+1)}/>;
+}
+function Photo({idx,reveal,cls="h-48"}){
+  const it=POOL[idx]||{};
+  return (
+    <div className="relative inline-block">
+      <div className={"bg-white rounded-2xl p-3 shadow-xl ring-1 ring-black/5 "+cls+" aspect-square flex items-center justify-center"}>
+        {it.code? <ArgImg code={it.code} v={it.v} size={600} alt="" className="max-h-full max-w-full object-contain"/> : <div className="text-5xl">🏷️</div>}
+      </div>
+      <div className="absolute -bottom-3 -right-3 rotate-[-6deg]">
+        <div className="bg-[#FBF6EC] rounded-md px-3 py-1.5 shadow-md ring-1 ring-black/10 flex items-center gap-1">
+          <span className="font-display font-bold text-[#1A1410] text-lg">£</span>
+          {reveal
+            ? <span className="font-display font-extrabold text-[#C8102E] text-xl pop tnum">{(Math.round(it.gbp*100)/100).toLocaleString("en-GB")}</span>
+            : <span className="relative inline-block"><span className="opacity-0 font-display font-extrabold text-xl">888</span><span className="absolute inset-0 -mx-1 rounded-sm bg-[#15110c]" style={{clipPath:"polygon(0 12%,100% 0,100% 88%,0 100%)"}}/></span>}
+        </div>
+      </div>
+    </div>
+  );
+}
+function playerList(room){ return room&&room.players? Object.entries(room.players).map(([id,p])=>({id,...p})) : []; }
+function Leaderboard({room,compact}){
+  const ps=playerList(room).map(p=>({...p,_t:totalFor(room,p.id)})).sort((a,b)=>b._t-a._t);
+  if(!ps.length) return <div className="text-white/50 text-sm">No players yet…</div>;
+  return (
+    <div className="space-y-2">
+      {ps.map((p,i)=>{ const lead=i===0&&p._t>0;
+        return (<div key={p.id} className={"flex items-center gap-3 rounded-xl px-3 "+(compact?"py-1.5":"py-2.5")+" "+(lead?"bg-[#C9A646]/20 ring-1 ring-[#C9A646]":"bg-white/8")}>
+          <div className={"font-display font-bold tnum "+(compact?"text-base w-5":"text-xl w-6")+" "+(lead?"text-[#C9A646]":"text-white/50")}>{i+1}</div>
+          <div className="w-7 h-7 rounded-full grid place-items-center text-white text-xs font-bold shrink-0" style={{background:p.color||"#888"}}>{(p.name||"?")[0].toUpperCase()}</div>
+          <div className="flex-1 font-semibold text-white truncate">{p.name}{p.id===myId&&<span className="text-white/50 font-normal"> · you</span>}</div>
+          <div className={"font-display font-extrabold tnum "+(compact?"text-base":"text-xl")+" "+(lead?"text-[#C9A646]":"text-white")}>{p._t}</div>
+        </div>);
+      })}
+    </div>
+  );
+}
+function Timer({deadline,size=110}){
+  const [now,setNow]=useState(Date.now());
+  useEffect(()=>{const t=setInterval(()=>setNow(Date.now()),250);return ()=>clearInterval(t);},[]);
+  const left=Math.max(0,Math.ceil(((deadline||now)-now)/1000)), frac=Math.max(0,Math.min(1,((deadline||now)-now)/ROUND_MS));
+  const r=size/2-8,c=2*Math.PI*r,danger=left<=5;
+  return (<div className="relative grid place-items-center" style={{width:size,height:size}}>
+    <svg width={size} height={size} className="-rotate-90"><circle cx={size/2} cy={size/2} r={r} stroke="rgba(255,255,255,.15)" strokeWidth="8" fill="none"/><circle cx={size/2} cy={size/2} r={r} stroke={danger?"#C8102E":"#C9A646"} strokeWidth="8" fill="none" strokeDasharray={c} strokeDashoffset={c*(1-frac)} strokeLinecap="round" style={{transition:"stroke-dashoffset .3s linear"}}/></svg>
+    <div className={"absolute font-display font-extrabold tnum "+(danger?"text-[#ff6b6b]":"text-white")} style={{fontSize:size*0.34}}>{left}</div>
+  </div>);
+}
+function ScratchCard({prize}){
+  const cv=useRef(null); const [done,setDone]=useState(false);
+  useEffect(()=>{const c=cv.current;if(!c)return;const ctx=c.getContext("2d");
+    const g=ctx.createLinearGradient(0,0,c.width,c.height);g.addColorStop(0,"#C9A646");g.addColorStop(1,"#E7C96B");ctx.fillStyle=g;ctx.fillRect(0,0,c.width,c.height);
+    ctx.fillStyle="rgba(90,60,0,.55)";ctx.font="bold 15px Hanken Grotesk";ctx.textAlign="center";ctx.fillText("✦ SCRATCH TO REVEAL ✦",c.width/2,c.height/2+5);
+    let drawing=false,fin=false;
+    const P=e=>{const r=c.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return{x:(t.clientX-r.left)*(c.width/r.width),y:(t.clientY-r.top)*(c.height/r.height)};};
+    const chk=()=>{const d=ctx.getImageData(0,0,c.width,c.height).data;let cl=0,n=0;for(let i=3;i<d.length;i+=40){n++;if(d[i]<40)cl++;}if(!fin&&cl/n>0.45){fin=true;setDone(true);}};
+    const sc=e=>{if(!drawing)return;const p=P(e);ctx.globalCompositeOperation="destination-out";ctx.beginPath();ctx.arc(p.x,p.y,16,0,7);ctx.fill();chk();};
+    const dn=e=>{drawing=true;sc(e);},up=()=>drawing=false;
+    c.addEventListener("mousedown",dn);c.addEventListener("mousemove",sc);window.addEventListener("mouseup",up);
+    c.addEventListener("touchstart",e=>{e.preventDefault();dn(e);},{passive:false});c.addEventListener("touchmove",e=>{e.preventDefault();sc(e);},{passive:false});window.addEventListener("touchend",up);
+    return ()=>{window.removeEventListener("mouseup",up);window.removeEventListener("touchend",up);};
+  },[]);
+  return (<div className="relative rounded-xl overflow-hidden ring-1 ring-black/10 select-none" style={{width:"100%",maxWidth:300,height:120}}>
+    <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-[#174A2B] to-[#0e3019] text-center px-4"><div><div className="text-[#E7C96B] text-xs font-bold uppercase tracking-wider">Bonus</div><div className="text-white font-display font-extrabold text-xl leading-tight">{prize}</div></div></div>
+    <canvas ref={cv} width={300} height={120} className={"absolute inset-0 w-full h-full cursor-pointer transition-opacity duration-500 "+(done?"opacity-0 pointer-events-none":"opacity-100")}/>
+  </div>);
+}
+const BONUS=["Double points next round!","+50 bonus points","Steal 20 from the leader","Closest wins a chocolate","+100 if you're last"];
+
+/* ---- scoring helpers (points computed live from guesses) ---- */
+function priceAt(room,pos){ const it=POOL[room.order[pos]]; return it?it.gbp:0; }
+function guessOf(p,pos){ return p&&p.guesses&&p.guesses[pos]!=null ? p.guesses[pos] : null; }
+function scorePos(room,pos){
+  const price=priceAt(room,pos); const ps=playerList(room);
+  let best=Infinity;
+  ps.forEach(p=>{ const g=guessOf(p,pos); if(g!=null){ const d=Math.abs(g-price); if(d<best)best=d; } });
+  const res={};
+  ps.forEach(p=>{ const g=guessOf(p,pos); let pt=0,win=false,spot=false; if(g!=null && best<Infinity){ const d=Math.abs(g-price); if(d===best){ win=true; spot=(d===0); pt=spot?2:1; } } res[p.id]={guess:g,pts:pt,win,spot}; });
+  return {price,res};
+}
+function roundsScored(room){ if(!room) return 0; if(room.phase==="final") return ROUNDS; if(room.phase==="reveal") return room.round+1; if(room.phase==="guessing") return room.round; return 0; }
+function totalFor(room,id){ const n=Math.min(roundsScored(room)*PER_ROUND,(room.order||[]).length); let t=0; for(let pos=0;pos<n;pos++){ const r=scorePos(room,pos).res[id]; if(r)t+=r.pts; } return t; }
+function roundPtsFor(room,id,rd){ let t=0; const base=rd*PER_ROUND; for(let pos=base;pos<Math.min(base+PER_ROUND,(room.order||[]).length);pos++){ const x=scorePos(room,pos).res[id]; if(x)t+=x.pts; } return t; }
+function allSubmitted(room){ const ps=playerList(room); return ps.length>0 && ps.every(p=>(p.submittedRound==null?-1:p.submittedRound)>=room.round); }
+
+/* ---- host actions (single writer) ---- */
+function hostStart(code,room){
+  const players={}; Object.entries(room.players||{}).forEach(([id,p])=>players[id]={name:p.name,color:p.color,guesses:{},submittedRound:-1});
+  roomRef(code).update({phase:"guessing",round:0,players,deadline:null});
+}
+function hostReveal(code,room){ if(!room||room.phase!=="guessing") return; roomRef(code).update({phase:"reveal"}); }
+function hostNext(code,room){ if(!room||room.phase!=="reveal") return; const r=room.round+1; if(r>=ROUNDS){ roomRef(code).update({phase:"final"}); return; } roomRef(code).update({round:r,phase:"guessing"}); }
+
+/* ====================== screens ====================== */
+function Landing({onStart,onJoin,prefillCode}){
+  const [name,setName]=useState(""); const [code,setCode]=useState(prefillCode||"");
+  const invited=!!prefillCode;
+  const steps=[
+    "Everyone joins on their own phone with the room code or the shared link.",
+    "Flip through the products and put your price on each — 3 rounds of 6 items.",
+    "Closest guess scores 1 point. Spot-on scores 2. A tie? Everyone tied scores.",
+    "After every round you'll all see everyone's guesses and the real prices.",
+    "Highest total after 3 rounds wins. Pop the scoreboard on a TV if you've got one."
+  ];
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-[#CE3320] to-[#AE2817] text-white flex flex-col items-center px-6 py-8">
+      <Trevor size={116} cls="mb-2"/>
+      <div className="font-hand text-[#E7C96B] text-xl">Christmas Day</div>
+      <div className="font-display font-extrabold text-4xl mb-2 text-center">The Argos Game</div>
+      <div className="text-white/80 mb-6 text-center max-w-sm">Guess the Argos price. Everyone plays on their own phone.</div>
+      <div className="w-full max-w-sm bg-white/10 rounded-2xl p-5 ring-1 ring-white/15">
+        <label className="block text-sm font-bold text-white mb-1">Your name</label>
+        <input value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Jenna" maxLength={14} className="w-full rounded-xl px-4 py-3 bg-white text-[#1A1410] font-semibold outline-none ring-2 ring-transparent focus:ring-white"/>
+        {invited ? (
+          <div className="mt-4">
+            <div className="text-white/70 text-sm mb-2">You're joining room <b className="text-[#C9A646] font-display tracking-widest">{code}</b></div>
+            <Btn tone="gold" className="w-full py-3.5 text-lg" disabled={name.trim().length<1} onClick={()=>onJoin(code,name)}>Join game →</Btn>
+          </div>
+        ) : (
+          <div className="mt-4 space-y-4">
+            <Btn tone="pine" className="w-full py-3.5 text-lg" disabled={name.trim().length<1} onClick={()=>onStart(name)}>Start a new game</Btn>
+            <div className="flex items-center gap-3 text-white/40 text-xs"><div className="flex-1 h-px bg-white/15"/>or join one<div className="flex-1 h-px bg-white/15"/></div>
+            <div>
+              <label className="block text-sm font-bold text-[#E7C96B] mb-1">Room code</label>
+              <input value={code} onChange={e=>setCode(e.target.value.replace(/\D/g,"").slice(0,4))} inputMode="numeric" placeholder="0000" className="w-full rounded-xl px-4 py-3 bg-[#FFF6DD] text-[#8a6d12] border-2 border-[#C9A646] font-display font-extrabold text-2xl tracking-[0.4em] text-center outline-none placeholder:text-[#d8c88a]"/>
+              <Btn tone="gold" className="w-full py-3 mt-2" disabled={name.trim().length<1||code.length!==4} onClick={()=>onJoin(code,name)}>Join game →</Btn>
+            </div>
+          </div>
+        )}
+      </div>
+      <div className="w-full max-w-sm mt-5 bg-white/5 rounded-2xl p-5 ring-1 ring-white/10">
+        <div className="font-display font-extrabold text-lg text-[#E7C96B] mb-3">How to play</div>
+        <div className="space-y-2.5">
+          {steps.map((s,i)=>(<div key={i} className="flex items-start gap-3">
+            <div className="w-6 h-6 rounded-full bg-[#C9A646] text-[#2a1e05] font-bold text-sm grid place-items-center shrink-0 mt-0.5">{i+1}</div>
+            <div className="text-sm text-white/85 leading-snug">{s}</div>
+          </div>))}
+        </div>
+      </div>
+      <div className="text-white/50 text-xs mt-5 max-w-sm text-center">Whoever starts also plays and runs the rounds. Share the link from the lobby so everyone can jump in.</div>
+    </div>
+  );
+}
+function roastRound(room,rd){
+  const base=rd*PER_ROUND; const positions=[]; for(let i=0;i<PER_ROUND;i++){const p=base+i; if(p<room.order.length)positions.push(p);}
+  const players=playerList(room);
+  let best=null, worst=null; const spend={};
+  players.forEach(p=>spend[p.id]={name:p.name,total:0,rpts:roundPtsFor(room,p.id,rd)});
+  positions.forEach(pos=>{ const price=priceAt(pos?room:room,pos); const it=POOL[room.order[pos]]||{};
+    players.forEach(p=>{ const g=guessOf(p,pos); if(g==null)return; const err=Math.abs(g-price); const pct=err/(price||1);
+      spend[p.id].total+=g;
+      const rec={name:p.name,g,price,err,pct,item:it.name||"",code:it.code,v:it.v};
+      if(!best||pct<best.pct) best=rec;
+      if(!worst||pct>worst.pct) worst=rec;
+    });
+  });
+  const ids=players.map(p=>p.id);
+  const bs=ids.slice().sort((a,b)=>spend[b].total-spend[a].total)[0];
+  const rw=ids.slice().sort((a,b)=>spend[b].rpts-spend[a].rpts)[0];
+  return {best,worst,bigSpender:bs?spend[bs]:null,roundWinner:rw?spend[rw]:null};
+}
+function RoundRoast({room,rd,isHost,onSheet,onNext,last}){
+  const r=roastRound(room,rd);
+  const short=s=>s&&s.length>24?s.slice(0,24)+"…":s;
+  const quip = r.worst ? `${r.worst.name} looked at a ${short(r.worst.item)} and said ${gbp(r.worst.g)}. It was ${gbp(r.worst.price)}. Trevor needs a lie down.` : "Trevor is quietly impressed.";
+  const Big=({rec,emoji,label,good})=> rec? (
+    <div className={"rounded-2xl p-3 ring-1 "+(good?"bg-[#174A2B]/45 ring-[#9BE5A0]/40":"bg-black/25 ring-white/15")}>
+      <div className="flex items-center gap-3">
+        <div className="w-24 h-24 bg-white rounded-xl p-1.5 shrink-0 flex items-center justify-center">{rec.code?<ArgImg code={rec.code} v={rec.v} size={300} className="max-w-full max-h-full object-contain"/>:<span className="text-3xl">🏷️</span>}</div>
+        <div className="flex-1 min-w-0">
+          <div className={"text-[11px] uppercase tracking-widest font-bold "+(good?"text-[#9BE5A0]":"text-[#E7C96B]")}>{emoji} {label}</div>
+          <div className="font-display font-extrabold text-2xl text-white leading-tight">{rec.name}</div>
+          <div className="text-white/75 text-sm leading-tight truncate">{rec.item}</div>
+          <div className="text-sm mt-1"><span className="text-white/60">guessed</span> <b className="text-white">{gbp(rec.g)}</b> · <span className="text-white/60">it was</span> <b className="text-[#C9A646]">{gbp(rec.price)}</b></div>
+        </div>
+      </div>
+    </div>
+  ):null;
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-[#CE3320] to-[#AE2817] text-white flex flex-col px-5 py-6 overflow-auto no-scrollbar">
+      <div className="text-center mb-4">
+        <Trevor size={92} cls="mx-auto mb-1"/>
+        <div className="font-hand text-[#E7C96B] text-xl">Trevor's verdict</div>
+        <div className="font-display font-extrabold text-3xl">Round {rd+1} — the damage</div>
+      </div>
+      <div className="space-y-3 max-w-md mx-auto w-full">
+        <Big rec={r.best} emoji="🎯" label="Guess of the round" good/>
+        <Big rec={r.worst} emoji="🌋" label="Wildest miss"/>
+        <div className="grid grid-cols-2 gap-3">
+          {r.bigSpender&&<div className="bg-white/10 rounded-2xl p-3 ring-1 ring-white/10"><div className="text-xl">🤑</div><div className="text-[11px] uppercase tracking-wide font-bold text-white/60">Biggest spender</div><div className="font-display font-extrabold text-lg text-[#C9A646] leading-tight">{r.bigSpender.name}</div><div className="text-[11px] text-white/60">{gbp(r.bigSpender.total)} of guesses</div></div>}
+          {r.roundWinner&&<div className="bg-white/10 rounded-2xl p-3 ring-1 ring-white/10"><div className="text-xl">👑</div><div className="text-[11px] uppercase tracking-wide font-bold text-white/60">Round winner</div><div className="font-display font-extrabold text-lg text-[#9BE5A0] leading-tight">{r.roundWinner.name}</div><div className="text-[11px] text-white/60">+{r.roundWinner.rpts} points</div></div>}
+        </div>
+        <div className="bg-black/20 rounded-2xl p-3 text-center font-hand text-lg text-[#E7C96B]">"{quip}"</div>
+      </div>
+      <div className="mt-6 max-w-md mx-auto w-full flex flex-col gap-2">
+        <Btn tone="gold" className="w-full py-3" onClick={onSheet}>📋 See everyone's scoresheet</Btn>
+        {isHost && <Btn tone="pine" className="w-full py-3" onClick={onNext}>{last?"Skip to final results 🏆":"Next round →"}</Btn>}
+      </div>
+    </div>
+  );
+}
+function GuessDeck({code,room}){
+  const base=room.round*PER_ROUND;
+  const positions=[]; for(let i=0;i<PER_ROUND;i++){ const pos=base+i; if(pos<room.order.length) positions.push(pos); }
+  const [vals,setVals]=useState(()=>positions.map(()=>""));
+  const [cur,setCur]=useState(0);
+  const pos=positions[cur]; const item=POOL[room.order[pos]]||{};
+  const setVal=v=>setVals(a=>{const b=a.slice();b[cur]=v;return b;});
+  const filled=vals.filter(v=>parseFloat(v)>0).length;
+  const allIn=filled===positions.length;
+  const submit=()=>{ const up={submittedRound:room.round}; positions.forEach((p,i)=>{ up["guesses/"+p]=parseFloat(vals[i])||0; }); roomRef(code).child("players/"+myId).update(up); };
+  return (
+    <div className="min-h-screen bg-[#FBF6EC] text-[#1A1410] flex flex-col">
+      <div className="bg-[#C8102E] text-white px-5 py-3 flex items-center justify-between">
+        <div className="font-bold">Round {room.round+1} of {ROUNDS}</div>
+        <div className="text-sm font-semibold tnum">Item {cur+1} / {positions.length}</div>
+      </div>
+      <div className="flex justify-center gap-2 py-2.5 bg-[#F3EAD6]">
+        {positions.map((p,i)=><button key={i} onClick={()=>setCur(i)} className={"w-3 h-3 rounded-full transition "+(i===cur?"bg-[#C8102E] scale-125":parseFloat(vals[i])>0?"bg-[#174A2B]":"bg-[#d9c9a6]")}/>)}
+      </div>
+      <div className="flex-1 flex flex-col items-center px-6 pt-4 overflow-auto no-scrollbar">
+        <Photo idx={room.order[pos]} reveal={false} cls="h-60"/>
+        <div className="font-display font-bold text-lg text-center mt-3">{item.name}</div>
+        {item.desc && <div className="text-[#8a7a5f] text-xs text-center mb-2">{item.desc}</div>}
+        <label className="text-[#8a7a5f] text-xs font-bold mb-1">Your price guess</label>
+        <div className="font-display font-extrabold text-4xl text-[#C8102E] mb-3 tnum">£{vals[cur]||"0"}</div>
+        <Keypad val={vals[cur]} setVal={setVal}/>
+        <div className="text-[#8a7a5f] text-xs mt-3">Tap <b>.</b> for pennies, e.g. 24.99</div>
+      </div>
+      <div className="p-4 flex gap-3 items-stretch">
+        <button onClick={()=>setCur(c=>Math.max(0,c-1))} disabled={cur===0} className="rounded-xl px-5 bg-black/5 text-[#1A1410] font-bold text-xl disabled:opacity-30">←</button>
+        {cur<positions.length-1
+          ? <Btn tone="red" className="flex-1 py-4 text-lg" disabled={!(parseFloat(vals[cur])>0)} onClick={()=>setCur(c=>c+1)}>Next item →</Btn>
+          : <Btn tone="pine" className="flex-1 py-4 text-lg" disabled={!allIn} onClick={submit}>🔒 Submit all {positions.length}</Btn>}
+      </div>
+      {cur===positions.length-1 && !allIn && <div className="text-center text-[#8a7a5f] text-xs pb-3 -mt-1">Put a price on every item to submit — {filled}/{positions.length} done. Tap the dots to go back.</div>}
+    </div>
+  );
+}
+function GameScreen({code,room,isHost}){
+  const [showSheet,setShowSheet]=useState(false);
+  useEffect(()=>{ setShowSheet(false); },[room&&room.phase,room&&room.round]);
+  if(!room) return <Splash msg="Loading game…"/>;
+  const me=room.players&&room.players[myId];
+  const players=playerList(room);
+  const joinUrl=location.origin+location.pathname+"?code="+code;
+  const tvUrl=joinUrl+"&tv=1";
+
+  if(room.phase==="lobby"){
+    const share=async()=>{ try{ if(navigator.share){ await navigator.share({title:"The Argos Game",text:"Join my Argos Game — code "+code,url:joinUrl}); } else { await navigator.clipboard.writeText(joinUrl); alert("Invite link copied — paste it into your group chat."); } }catch(e){} };
+    const shareTV=async()=>{ try{ if(navigator.share){ await navigator.share({title:"Argos Game scoreboard",text:"Open the Argos Game scoreboard on the TV",url:tvUrl}); } else { await navigator.clipboard.writeText(tvUrl); alert("TV scoreboard link copied — open it in a browser on your TV."); } }catch(e){} };
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-[#CE3320] to-[#AE2817] text-white flex flex-col items-center px-6 py-8 overflow-auto no-scrollbar">
+        <div className="font-hand text-[#E7C96B] text-lg">Christmas Day</div>
+        <div className="font-display font-extrabold text-3xl mb-4">The Argos Game</div>
+        <div className="text-white/70 text-xs uppercase tracking-widest font-bold mb-1">Room code</div>
+        <div className="font-display font-extrabold text-6xl tracking-[0.2em] text-[#C9A646] tnum mb-4">{code}</div>
+        <QR text={joinUrl} size={190}/>
+        <Btn tone="gold" className="mt-4 w-full max-w-xs py-3" onClick={share}>🔗 Share invite link</Btn>
+        <Btn tone="ghost" className="mt-2 w-full max-w-xs py-3" onClick={shareTV}>📺 Show scoreboard on a TV</Btn>
+        <div className="text-white/50 text-xs mt-1">or just tell people the code above</div>
+        <div className="w-full max-w-sm mt-6">
+          <div className="text-xs uppercase tracking-widest font-bold text-white/60 mb-2">In the game ({players.length})</div>
+          <div className="flex flex-wrap gap-2">{players.map(p=>(<div key={p.id} className="flex items-center gap-2 bg-white/10 rounded-full pl-1 pr-3 py-1"><div className="w-6 h-6 rounded-full grid place-items-center text-xs font-bold" style={{background:p.color}}>{(p.name||"?")[0].toUpperCase()}</div><span className="text-sm font-semibold">{p.name}{p.id===myId?" (you)":""}</span></div>))}</div>
+        </div>
+        <div className="w-full max-w-xs mt-8">
+          {isHost
+            ? <Btn tone="pine" className="w-full py-4 text-lg" disabled={players.length<1} onClick={()=>hostStart(code,room)}>Start game ▶</Btn>
+            : <div className="text-center text-white/75 bg-white/10 rounded-xl py-3">Waiting for the host to start…</div>}
+        </div>
+        <div className="text-white/45 text-xs mt-4 max-w-xs text-center">3 rounds · 6 items each · closest guess scores</div>
+      </div>
+    );
+  }
+
+  if(room.phase==="guessing"){
+    const submitted=me&&(me.submittedRound==null?-1:me.submittedRound)>=room.round;
+    if(!submitted) return <GuessDeck code={code} room={room}/>;
+    const nSub=players.filter(p=>(p.submittedRound==null?-1:p.submittedRound)>=room.round).length;
+    return (<Center bg="pine">
+      <div className="text-5xl mb-3">✅</div>
+      <div className="font-display font-extrabold text-2xl">You're in!</div>
+      <div className="text-white/70 mb-4">Round {room.round+1} locked. Waiting for everyone else…</div>
+      <div className="font-display font-extrabold text-5xl text-[#E7C96B] tnum">{nSub}<span className="text-white/40">/{players.length}</span></div>
+      <div className="text-white/60 text-sm uppercase tracking-widest font-bold mt-1">submitted</div>
+      {isHost && nSub<players.length && <div className="mt-6"><Btn tone="gold" onClick={()=>hostReveal(code,room)}>Reveal now (skip the slowpokes)</Btn></div>}
+    </Center>);
+  }
+
+  if(room.phase==="reveal"){
+    const base=room.round*PER_ROUND; const idxs=[]; for(let i=0;i<PER_ROUND;i++){const p=base+i; if(p<room.order.length)idxs.push(p);}
+    const last=room.round+1>=ROUNDS;
+    const myRp=me?roundPtsFor(room,myId,room.round):0;
+    if(!showSheet) return <RoundRoast room={room} rd={room.round} isHost={isHost} onSheet={()=>setShowSheet(true)} onNext={()=>hostNext(code,room)} last={last}/>;
+    return (<div className="min-h-screen bg-gradient-to-b from-[#CE3320] to-[#AE2817] text-white flex flex-col items-center px-4 py-6 overflow-auto no-scrollbar">
+      <button onClick={()=>setShowSheet(false)} className="self-start text-white/60 text-sm mb-1">← back to the roast</button>
+      <div className="font-display font-extrabold text-2xl text-[#C9A646] mb-1 text-center">Round {room.round+1} scoresheet</div>
+      {me && <div className="text-[#9BE5A0] font-bold mb-3">You scored +{myRp} this round</div>}
+      <div className="w-full max-w-3xl"><ScoreSheet room={room} idxs={idxs} title/></div>
+      <div className="w-full max-w-sm mt-6"><div className="text-xs uppercase tracking-widest font-bold text-white/60 mb-2">Standings</div><Leaderboard room={room} compact/></div>
+      {isHost
+        ? <Btn tone="gold" className="mt-6 px-6 py-3" onClick={()=>hostNext(code,room)}>{last?"See final results 🏆":"Next round →"}</Btn>
+        : <div className="text-white/50 text-sm mt-6">Waiting for the host to continue…</div>}
+    </div>);
+  }
+
+  if(room.phase==="final"){
+    const onAgain=()=>{ const players={}; Object.entries(room.players||{}).forEach(([id,p])=>players[id]={name:p.name,color:p.color,guesses:{},submittedRound:-1}); roomRef(code).update({phase:"lobby",round:0,order:shuffledOrder().slice(0,TOTAL_N),players}); };
+    return <div className="min-h-screen bg-gradient-to-b from-[#CE3320] to-[#AE2817] text-white flex flex-col"><Final room={room} isHost={isHost} onAgain={onAgain}/></div>;
+  }
+  return <Splash msg="One moment…"/>;
+}
+function ScoreSheet({room,idxs,title}){
+  const positions = idxs || (room.order||[]).map((_,i)=>i);
+  const players=playerList(room).map(p=>({...p,_t:totalFor(room,p.id)})).sort((a,b)=>b._t-a._t);
+  if(!positions.length||!players.length) return <div className="text-white/60 text-sm text-center">Nothing to show yet.</div>;
+  return (
+    <div className="bg-[#FBF6EC] text-[#1A1410] rounded-2xl p-3 sm:p-5 overflow-x-auto no-scrollbar shadow-xl ring-1 ring-black/10">
+      {title && <div className="text-center mb-4"><div className="font-display font-extrabold text-2xl sm:text-3xl text-[#1A1410]">Christmas Day Argos Game</div><div className="font-hand text-[#8a7a5f] text-lg">Trevor reads out the prices…</div></div>}
+      <table className="text-sm" style={{borderCollapse:"collapse",width:"100%",minWidth:230+players.length*78}}>
+        <thead><tr className="border-b-2 border-[#E6D9BF]">
+          <th className="text-left p-2 text-[#8a7a5f] font-bold">Item</th>
+          <th className="p-2 text-[#C8102E] font-bold">Price</th>
+          {players.map(p=><th key={p.id} className={"p-2 font-bold whitespace-nowrap "+(p.id===myId?"bg-[#F3EAD6]":"")} style={{color:p.color}}>{p.name}{p.id===myId?" (you)":""}</th>)}
+        </tr></thead>
+        <tbody>
+          {positions.map((pos,ri)=>{ const sc=scorePos(room,pos); const it=POOL[room.order[pos]]||{};
+            return (<tr key={pos} className="border-b border-[#E6D9BF]">
+              <td className="p-2"><div className="flex items-center gap-2.5">
+                <div className="relative shrink-0"><div className="w-20 h-20 bg-white rounded-lg ring-1 ring-black/5 flex items-center justify-center p-1">{it.code?<ArgImg code={it.code} v={it.v} size={200} className="max-w-full max-h-full object-contain"/>:<span className="text-xl">🏷️</span>}</div><div className="absolute -top-2 -left-2 w-6 h-6 rounded-full bg-[#C8102E] text-white text-xs font-bold grid place-items-center ring-2 ring-[#FBF6EC]">{ri+1}</div></div>
+                <span className="text-sm font-semibold leading-tight" style={{maxWidth:160}}>{it.name}</span></div></td>
+              <td className="p-2 text-center font-display font-extrabold text-[#C8102E] tnum whitespace-nowrap">{gbp(sc.price)}</td>
+              {players.map(p=>{ const r=sc.res[p.id]||{}; const v=r.guess;
+                return <td key={p.id} className={"p-2 text-center tnum whitespace-nowrap "+(p.id===myId?"bg-[#F3EAD6]/60":"")}>{v!=null
+                  ? <span className={r.spot?"inline-block px-2 py-0.5 rounded-full bg-[#C9A646] text-[#2a1e05] font-extrabold":r.win?"inline-block px-2 py-0.5 rounded-full bg-[#C8102E] text-white font-bold":"text-[#4a4032]"}>{r.spot?"👑 ":""}{gbp(v)}</span>
+                  : <span className="text-[#bbb]">—</span>}</td>;})}
+            </tr>);
+          })}
+          <tr className="border-t-2 border-[#C8102E]">
+            <td className="p-2 font-display font-bold">Total points</td><td/>
+            {players.map(p=><td key={p.id} className={"p-2 text-center font-display font-extrabold text-lg tnum "+(p.id===myId?"bg-[#F3EAD6]":"")}>{p._t}</td>)}
+          </tr>
+        </tbody>
+      </table>
+      <div className="text-[11px] text-[#8a7a5f] mt-3 text-center">Closest guess circled in red · 👑 spot-on (2 pts) · ties both score</div>
+    </div>
+  );
+}
+function awardsFrom(room){
+  const players=playerList(room); const positions=(room.order||[]).map((_,i)=>i).slice(0,roundsScored(room)*PER_ROUND);
+  if(!players.length||!positions.length) return [];
+  const st={}; players.forEach(p=>st[p.id]={name:p.name,wins:0,total:0,err:0,wild:-1,wi:null});
+  positions.forEach(pos=>{ const sc=scorePos(room,pos); const price=sc.price;
+    players.forEach(p=>{ const r=sc.res[p.id]; const v=r?r.guess:null; if(v==null)return; const d=Math.abs(v-price); st[p.id].total+=v; st[p.id].err+=d; const rr=d/(price||1); if(rr>st[p.id].wild){st[p.id].wild=rr;st[p.id].wi={g:v,p:price};} if(r.win)st[p.id].wins++; });
+  });
+  const ids=players.map(p=>p.id);
+  const top=(fn,dir)=>ids.slice().sort((a,b)=>(fn(st[b])-fn(st[a]))*(dir||1))[0];
+  const sn=top(s=>s.wins), sp=top(s=>s.total), wd=top(s=>s.wild), cd=top(s=>s.err);
+  return [
+    {e:"🎯",t:"Spot-On Sniper",n:st[sn].name,d:`closest on ${st[sn].wins} ${st[sn].wins===1?"item":"items"}`},
+    {e:"🌋",t:"Wildest Guess",n:st[wd].name,d:st[wd].wi?`guessed ${gbp(st[wd].wi.g)}, it was ${gbp(st[wd].wi.p)}`:""},
+    {e:"🤑",t:"Biggest Spender",n:st[sp].name,d:`${gbp(st[sp].total)} of guesses`},
+    {e:"🧊",t:"Ice Cold",n:st[cd].name,d:`${gbp(st[cd].err)} off all game`},
+  ];
+}
+function Awards({room}){
+  const a=awardsFrom(room); if(!a.length) return null;
+  return (<div className="mt-5">
+    <div className="text-center font-hand text-2xl text-[#E7C96B] mb-2">And the awards go to…</div>
+    <div className="grid grid-cols-2 gap-2">
+      {a.map((x,i)=>(<div key={i} className="bg-white/10 rounded-xl p-3 ring-1 ring-white/10 text-left">
+        <div className="text-2xl leading-none mb-1">{x.e}</div>
+        <div className="font-bold text-xs text-white">{x.t}</div>
+        <div className="font-display font-extrabold text-xl text-[#C9A646] leading-tight">{x.n}</div>
+        <div className="text-[11px] text-white/60 leading-tight">{x.d}</div>
+      </div>))}
+    </div>
+  </div>);
+}
+function Final({room,onAgain,isHost}){
+  const ps=playerList(room).map(p=>({...p,_t:totalFor(room,p.id)})).sort((a,b)=>b._t-a._t);
+  const win=ps[0];
+  return (<div className="flex-1 overflow-auto no-scrollbar px-4 py-6">
+    <div className="text-center mb-5">
+      <div className="text-5xl mb-1 floaty">🏆</div>
+      <div className="text-white/60 uppercase tracking-widest text-xs font-bold">Winner</div>
+      <div className="font-display font-extrabold text-5xl text-[#C9A646] pop">{win?win.name:"—"}</div>
+      {win&&<div className="text-xl mt-1">with {win._t} points</div>}
+    </div>
+    <div className="max-w-3xl mx-auto"><ScoreSheet room={room} title/></div>
+    <div className="max-w-md mx-auto"><Awards room={room}/></div>
+    <div className="text-center mt-5">{isHost? <Btn tone="pine" onClick={onAgain}>↺ Play again</Btn> : <div className="text-white/60 text-sm">The host can start a new game.</div>}</div>
+  </div>);
+}
+function PlayerScreen(){ return null; }
+function Keypad({val,setVal}){
+  const s=String(val||"");
+  const push=d=>{
+    if(d==="."){ if(s.includes(".")) return; setVal((s||"0")+"."); return; }
+    if(s.includes(".") && (s.split(".")[1]||"").length>=2) return;
+    const n=(s==="0"?"":s)+d; if(n.replace(".","").length>7) return; setVal(n);
+  };
+  const K=({children,onClick})=><button onClick={onClick} className="bg-white rounded-xl py-3.5 font-bold text-2xl shadow ring-1 ring-black/5 active:translate-y-[1px]">{children}</button>;
+  return (<div className="grid grid-cols-3 gap-2 w-full max-w-[320px]">
+    {["1","2","3","4","5","6","7","8","9"].map(k=><K key={k} onClick={()=>push(k)}>{k}</K>)}
+    <K onClick={()=>push(".")}>.</K>
+    <K onClick={()=>push("0")}>0</K>
+    <K onClick={()=>setVal(s.slice(0,-1))}>⌫</K>
+  </div>);
+}
+function Center({children,bg}){ return <div className={"min-h-screen flex flex-col items-center justify-center text-center px-6 text-white "+(bg==="pine"?"bg-gradient-to-b from-[#174A2B] to-[#0e3019]":"bg-gradient-to-b from-[#CE3320] to-[#AE2817]")}>{children}</div>; }
+function Splash({msg}){ return <Center><div className="text-4xl mb-3 floaty">🎁</div><div className="text-white/80">{msg}</div></Center>; }
+
+/* ---- setup / error screen when Firebase isn't configured ---- */
+function SetupNeeded(){
+  return (<div className="min-h-screen bg-[#AE2817] text-white flex items-center justify-center px-6">
+    <div className="max-w-md bg-white/10 rounded-2xl p-6 ring-1 ring-white/15">
+      <div className="text-3xl mb-2">🔌</div>
+      <div className="font-display font-extrabold text-2xl mb-2">Almost there — connect Firebase</div>
+      <p className="text-white/80 text-sm mb-3">This is the live multiplayer build. It needs a free Firebase Realtime Database to sync phones with the screen. Paste your project's config into the <code className="bg-black/30 px-1 rounded">ARGOS_FIREBASE_CONFIG</code> block near the top of this file, then reload.</p>
+      <p className="text-white/50 text-xs">Status: {FB_ERR==="sdk-missing"?"Firebase SDK didn't load (check your network / the two firebase script tags).":"Config still has PASTE placeholders."}</p>
+    </div>
+  </div>);
+}
+
+/* ---- root: pick role, subscribe to room ---- */
+function TVCodeEntry({onCode}){
+  const [c,setC]=useState("");
+  return (<Center><div className="text-5xl mb-3">📺</div><div className="font-display font-extrabold text-2xl mb-1">TV scoreboard</div><div className="text-white/70 mb-4 text-sm">Enter the room code shown on a player's phone.</div>
+    <input value={c} onChange={e=>setC(e.target.value.replace(/\D/g,"").slice(0,4))} inputMode="numeric" placeholder="0000" className="rounded-xl px-4 py-3 bg-[#FFF6DD] text-[#8a6d12] border-2 border-[#C9A646] font-display font-extrabold text-3xl tracking-[0.4em] text-center outline-none w-52"/>
+    <div className="mt-4"><Btn tone="gold" disabled={c.length!==4} onClick={()=>onCode(c)}>Show scoreboard</Btn></div>
+  </Center>);
+}
+function TVScreen({code,room}){
+  const joinUrl=location.origin+location.pathname+"?code="+code;
+  if(!room) return <Center><div className="text-4xl mb-3 floaty">📺</div><div className="text-white/80">Looking for room {code}…</div><div className="text-white/50 text-sm mt-1">Make sure someone has started this game on their phone.</div></Center>;
+  const players=playerList(room);
+  if(room.phase==="lobby"){
+    return (<div className="min-h-screen bg-gradient-to-b from-[#CE3320] to-[#AE2817] text-white flex flex-col items-center justify-center px-8 py-8">
+      <div className="font-hand text-[#E7C96B] text-2xl">Christmas Day</div>
+      <div className="font-display font-extrabold text-6xl mb-8 text-center">The Argos Game</div>
+      <div className="flex flex-col sm:flex-row items-center gap-10">
+        <div className="text-center"><div className="text-white/60 uppercase tracking-widest font-bold mb-3">Scan to join</div><QR text={joinUrl} size={240}/></div>
+        <div className="text-center"><div className="text-white/60 uppercase tracking-widest font-bold mb-2">Room code</div><div className="font-display font-extrabold text-8xl tracking-[0.12em] text-[#C9A646] tnum">{code}</div></div>
+      </div>
+      <div className="mt-10 w-full max-w-3xl"><div className="text-center text-white/60 uppercase tracking-widest font-bold mb-3">In the game ({players.length})</div>
+        <div className="flex flex-wrap justify-center gap-3">{players.map(p=>(<div key={p.id} className="flex items-center gap-2 bg-white/10 rounded-full pl-1.5 pr-4 py-1.5"><div className="w-8 h-8 rounded-full grid place-items-center font-bold text-white" style={{background:p.color}}>{(p.name||"?")[0].toUpperCase()}</div><span className="text-lg font-semibold">{p.name}</span></div>))}</div></div>
+      <div className="mt-10 text-white/50 text-lg">Waiting for the host to start…</div>
+    </div>);
+  }
+  if(room.phase==="guessing"){
+    const nSub=players.filter(p=>(p.submittedRound==null?-1:p.submittedRound)>=room.round).length;
+    return (<div className="min-h-screen bg-gradient-to-b from-[#174A2B] to-[#0e3019] text-white flex flex-col items-center justify-center px-8">
+      <div className="font-display font-extrabold text-5xl text-[#E7C96B] mb-2">Round {room.round+1} of {ROUNDS}</div>
+      <div className="text-2xl text-white/80 mb-10">Everyone's guessing on their phones…</div>
+      <div className="font-display font-extrabold text-8xl tnum">{nSub}<span className="text-white/40">/{players.length}</span></div>
+      <div className="text-white/60 uppercase tracking-widest font-bold mt-2 text-lg">locked in</div>
+      <div className="mt-12 w-full max-w-4xl flex flex-wrap justify-center gap-3">
+        {players.map(p=>{const done=(p.submittedRound==null?-1:p.submittedRound)>=room.round; return <div key={p.id} className={"flex items-center gap-2 rounded-full pl-1.5 pr-4 py-1.5 "+(done?"bg-[#C9A646]/25 ring-1 ring-[#C9A646]":"bg-white/10")}><div className="w-8 h-8 rounded-full grid place-items-center font-bold text-white" style={{background:p.color}}>{(p.name||"?")[0].toUpperCase()}</div><span className="text-lg font-semibold">{p.name}</span><span className="text-lg">{done?"✅":"⏳"}</span></div>;})}
+      </div>
+    </div>);
+  }
+  if(room.phase==="reveal"){
+    const base=room.round*PER_ROUND; const idxs=[]; for(let i=0;i<PER_ROUND;i++){const p=base+i; if(p<room.order.length)idxs.push(p);}
+    const rr=roastRound(room,room.round);
+    const Card=({code,v,label,name,sub,ring})=>(<div className={"rounded-2xl p-3 flex items-center gap-3 ring-1 "+ring}><div className="w-16 h-16 bg-white rounded-lg p-1 flex items-center justify-center shrink-0">{code?<ArgImg code={code} v={v} size={200} className="max-w-full max-h-full object-contain"/>:<span className="text-2xl">🏆</span>}</div><div><div className="text-xs font-bold uppercase tracking-wide text-[#E7C96B]">{label}</div><div className="font-display font-extrabold text-xl">{name}</div><div className="text-white/70 text-sm">{sub}</div></div></div>);
+    return (<div className="min-h-screen bg-gradient-to-b from-[#CE3320] to-[#AE2817] text-white px-6 py-6 overflow-auto no-scrollbar">
+      <div className="text-center mb-4"><Trevor size={104} cls="mx-auto"/><div className="font-hand text-[#E7C96B] text-2xl">Trevor's verdict on round {room.round+1}</div></div>
+      <div className="max-w-5xl mx-auto flex flex-wrap items-stretch justify-center gap-3 mb-5">
+        {rr.best&&<Card code={rr.best.code} v={rr.best.v} label="🎯 Best guess" name={rr.best.name} sub={gbp(rr.best.g)+" vs "+gbp(rr.best.price)} ring="bg-[#174A2B]/50 ring-[#9BE5A0]/40"/>}
+        {rr.worst&&<Card code={rr.worst.code} v={rr.worst.v} label="🌋 Wildest miss" name={rr.worst.name} sub={gbp(rr.worst.g)+" vs "+gbp(rr.worst.price)} ring="bg-black/25 ring-white/15"/>}
+        {rr.roundWinner&&<Card code={null} label="👑 Round winner" name={rr.roundWinner.name} sub={"+"+rr.roundWinner.rpts+" points"} ring="bg-[#C9A646]/20 ring-[#C9A646]"/>}
+      </div>
+      <div className="max-w-5xl mx-auto flex flex-col lg:flex-row items-start justify-center gap-6">
+        <div className="flex-1 max-w-4xl w-full"><div className="text-center text-white/70 uppercase tracking-widest font-bold mb-3 text-lg">Round {room.round+1} scoresheet</div><ScoreSheet room={room} idxs={idxs} title/></div>
+        <div className="w-full lg:w-80 shrink-0"><div className="text-center lg:text-left text-white/70 uppercase tracking-widest font-bold mb-3 text-lg">Standings</div><Leaderboard room={room}/></div>
+      </div>
+    </div>);
+  }
+  if(room.phase==="final"){
+    const ps=playerList(room).map(p=>({...p,_t:totalFor(room,p.id)})).sort((a,b)=>b._t-a._t); const win=ps[0];
+    return (<div className="min-h-screen bg-gradient-to-b from-[#CE3320] to-[#AE2817] text-white flex flex-col items-center px-6 py-8 overflow-auto no-scrollbar">
+      <div className="text-6xl mb-1 floaty">🏆</div>
+      <div className="text-white/60 uppercase tracking-widest font-bold">Winner</div>
+      <div className="font-display font-extrabold text-7xl text-[#C9A646] pop mb-1 text-center">{win?win.name:"—"}</div>
+      {win&&<div className="text-2xl mb-6">with {win._t} points</div>}
+      <div className="w-full max-w-4xl"><ScoreSheet room={room} title/></div>
+      <div className="w-full max-w-3xl"><Awards room={room}/></div>
+    </div>);
+  }
+  return <Center><div className="text-white/70">…</div></Center>;
+}
+
+/* ---- root: pick role, subscribe to room ---- */
+function App(){
+  const params=new URLSearchParams(location.search);
+  const isTV = params.get("tv")==="1";
+  const [joined,setJoined]=useState(false);
+  const [code,setCode]=useState(params.get("code")||"");
+  const [room,setRoom]=useState(null);
+  const [err,setErr]=useState("");
+  const subscribed = (isTV && !!code) || joined;
+  useEffect(()=>{ if(!subscribed||!code||!FB_OK) return;
+    const ref=roomRef(code); const cb=ref.on("value",s=>setRoom(s.val())); return ()=>ref.off("value",cb);
+  },[subscribed,code]);
+  const isHost = room && room.host===myId;
+  const subKey = playerList(room).map(p=>p.id+":"+(p.submittedRound==null?-1:p.submittedRound)).join(",");
+  useEffect(()=>{ if(!isHost||!room||room.phase!=="guessing") return;
+    if(allSubmitted(room)){ const t=setTimeout(()=>hostReveal(code,room),500); return ()=>clearTimeout(t); }
+  },[isHost,room&&room.phase,room&&room.round,subKey]);
+  if(!FB_OK) return <SetupNeeded/>;
+  if(isTV){ if(!code) return <TVCodeEntry onCode={setCode}/>; return <TVScreen code={code} room={room}/>; }
+  function makePlayer(name){ const color=COLORS[Math.abs([...(name||"x")].reduce((a,ch)=>a+ch.charCodeAt(0),0))%COLORS.length]||COLORS[0]; return {name:name||"Player",color,guesses:{},submittedRound:-1}; }
+  function startGame(name){ name=(name||"").trim()||"Host"; const c=randCode(); roomRef(c).set({host:myId,phase:"lobby",round:0,order:shuffledOrder().slice(0,TOTAL_N),players:{[myId]:makePlayer(name)},createdAt:Date.now()}).then(()=>{setCode(c);setJoined(true);}).catch(e=>setErr(String(e))); }
+  function joinGame(c,name){ name=(name||"").trim(); roomRef(c).get().then(s=>{ if(!s.exists()){ setErr("No game with code "+c+". Double-check it."); return; } roomRef(c).child("players/"+myId).update(makePlayer(name)).then(()=>{setCode(c);setJoined(true);}); }).catch(e=>setErr(String(e))); }
+  if(!joined) return (<div>{err&&<div className="fixed top-3 inset-x-3 z-50 bg-[#8F0A20] text-white text-sm rounded-xl px-4 py-2 text-center shadow-lg">{err}</div>}<Landing onStart={startGame} onJoin={joinGame} prefillCode={code}/></div>);
+  return <GameScreen code={code} room={room} isHost={isHost}/>;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
