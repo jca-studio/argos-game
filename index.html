@@ -954,6 +954,8 @@ function gcalHref(startAt,code,title){
 }
 function GameScreen({code,room,isHost,onLeave}){
   const [showSheet,setShowSheet]=useState(false);
+  const [showTV,setShowTV]=useState(false);
+  const [tvCopied,setTvCopied]=useState(false);
   const [,setTick]=useState(0);
   useEffect(()=>{ if(!room||!room.startAt) return; const t=setInterval(()=>setTick(x=>x+1),1000); return ()=>clearInterval(t); },[room&&room.startAt]);
   useEffect(()=>{ setShowSheet(false); },[room&&room.phase,room&&room.round]);
@@ -974,7 +976,12 @@ function GameScreen({code,room,isHost,onLeave}){
         <div className="font-display font-extrabold text-6xl tracking-[0.2em] text-[#C9A646] tnum mb-4">{code}</div>
         <QR text={joinUrl} size={190}/>
         <Btn tone="gold" className="mt-4 w-full max-w-xs py-3" onClick={share}>🔗 Share invite link</Btn>
-        {!(room.startAt && Date.now()<room.startAt) && <Btn tone="ghost" className="mt-2 w-full max-w-xs py-3" onClick={shareTV}>📺 Show scoreboard on a TV</Btn>}
+        {!(room.startAt && Date.now()<room.startAt) && <Btn tone="ghost" className="mt-2 w-full max-w-xs py-3" onClick={()=>setShowTV(v=>!v)}>📺 Show scoreboard on a TV</Btn>}
+        {showTV && !(room.startAt && Date.now()<room.startAt) && <div className="mt-2 w-full max-w-xs bg-black/25 rounded-xl p-3 ring-1 ring-white/15 text-center">
+          <div className="text-white/80 text-sm mb-2">On a TV's web browser, open <b>jca-studio.github.io/argos-game</b>, tap <b>scoreboard mode</b>, and enter code <b className="text-[#C9A646] tnum">{code}</b> with the remote. Or open this link on the TV directly:</div>
+          <div className="text-[11px] text-white/70 break-all bg-black/25 rounded-lg px-2 py-1.5 mb-2 select-all">{tvUrl}</div>
+          <Btn tone="gold" className="w-full py-2.5" onClick={async()=>{ try{ await navigator.clipboard.writeText(tvUrl); setTvCopied(true); setTimeout(()=>setTvCopied(false),1800); }catch(e){ setTvCopied(false); } }}>{tvCopied?"Copied ✓":"Copy TV link"}</Btn>
+        </div>}
         {room.startAt && Date.now()<room.startAt && <div className="mt-2 w-full max-w-xs">
           <div className="text-white/55 text-xs text-center font-bold mb-1">🗓️ Add to calendar</div>
           <div className="flex gap-2">
