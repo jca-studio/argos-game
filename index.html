@@ -830,7 +830,7 @@ function YourRound({room,rd}){
     </div>
   </div>);
 }
-function RoundRoast({room,rd,isHost,onSheet,onNext,last}){
+function RoundRoast({room,rd,isHost,onSheet,onNext,last,onLeave}){
   const r=roastRound(room,rd);
   const short=s=>s&&s.length>24?s.slice(0,24)+"…":s;
   const LINES=[
@@ -879,6 +879,7 @@ function RoundRoast({room,rd,isHost,onSheet,onNext,last}){
       <div className="mt-6 max-w-md mx-auto w-full flex flex-col gap-2">
         <Btn tone="gold" className="w-full py-3" onClick={onSheet}>📋 See everyone's scoresheet</Btn>
         {isHost && <Btn tone="pine" className="w-full py-3" onClick={onNext}>{last?"Skip to final results 🏆":"Next round →"}</Btn>}
+        <button onClick={onLeave} className="text-white/40 text-xs underline mx-auto mt-1">Leave game</button>
       </div>
     </div>
   );
@@ -1027,7 +1028,7 @@ function GameScreen({code,room,isHost,onLeave}){
     const base=room.round*PER_ROUND; const idxs=[]; for(let i=0;i<PER_ROUND;i++){const p=base+i; if(p<room.order.length)idxs.push(p);}
     const last=room.round+1>=ROUNDS;
     const myRp=me?roundPtsFor(room,myId,room.round):0;
-    if(!showSheet) return <RoundRoast room={room} rd={room.round} isHost={isHost} onSheet={()=>setShowSheet(true)} onNext={()=>hostNext(code,room)} last={last}/>;
+    if(!showSheet) return <RoundRoast room={room} rd={room.round} isHost={isHost} onSheet={()=>setShowSheet(true)} onNext={()=>hostNext(code,room)} last={last} onLeave={onLeave}/>;
     return (<div className="min-h-screen bg-gradient-to-b from-[#CE3320] to-[#AE2817] text-white flex flex-col items-center px-4 py-6 overflow-auto no-scrollbar">
       <button onClick={()=>setShowSheet(false)} className="self-start text-white/60 text-sm mb-1">← back to the roast</button>
       <div className="font-display font-extrabold text-2xl text-[#C9A646] mb-1 text-center">Round {room.round+1} scoresheet</div>
@@ -1037,6 +1038,7 @@ function GameScreen({code,room,isHost,onLeave}){
       {isHost
         ? <Btn tone="gold" className="mt-6 px-6 py-3" onClick={()=>hostNext(code,room)}>{last?"See final results 🏆":"Next round →"}</Btn>
         : <div className="text-white/50 text-sm mt-6">Waiting for the host to continue…</div>}
+      <button onClick={onLeave} className="text-white/40 text-xs underline mt-4">Leave game</button>
     </div>);
   }
 
@@ -1243,8 +1245,9 @@ function App(){
   // drop back into a game this device already belongs to (survives reloads / being "kicked out")
   useEffect(()=>{ if(isTV||!FB_OK){ setResuming(false); return; }
     const c=params.get("code")||savedCode; if(!c){ setResuming(false); return; }
-    roomRef(c).child("players/"+myId).get().then(s=>{
-      if(s.exists()){ setCode(c); setJoined(true); saveRoom(c); }
+    roomRef(c).get().then(s=>{
+      const mine=s.child("players/"+myId).exists(); const ph=s.child("phase").val();
+      if(mine && ph!=="final"){ setCode(c); setJoined(true); saveRoom(c); }
       else if(params.get("code")){ setCode(params.get("code")); }
       setResuming(false);
     }).catch(()=>setResuming(false));
