@@ -39,3 +39,17 @@
 .graphic--argos:focus-visible{outline-offset:6px}
 @media(max-width:850px){.graphic--argos{min-height:420px}.argos-tagline{font-size:clamp(29px,6vw,43px)}}
 @media(max-width:430px){.graphic--argos{min-height:390px;padding:22px}.argos-tagline{font-size:32px}.argos-cobalt{width:65px;height:65px}}
+
+/* Revision 07: launch editorial refinements */
+.hero h1{font-family:var(--sans);font-weight:600;letter-spacing:-.075em;line-height:1.04;font-size:clamp(52px,7.4vw,108px)}
+.hero .intro{font-family:var(--sans);font-size:clamp(18px,1.75vw,22px);letter-spacing:-.015em}
+.link .arrow-icon,.contact-link .arrow-icon{display:inline-flex;align-items:center;justify-content:center;font-family:Arial,sans-serif;font-weight:900;font-size:23px;line-height:1;transform:scaleX(1.05);color:var(--blue);margin-left:0}
+.link{gap:7px}.contact-link{display:inline-flex;justify-content:flex-start;gap:9px;max-width:100%;width:max-content;border-top:0;padding:10px 0}.contact-link:last-child{border-bottom:0}.contact-detail{display:flex;flex-direction:column;align-items:flex-start}.contact-detail p{margin-bottom:17px}
+.section-head{min-height:70px}.split{grid-template-columns:.8fr 1.2fr;gap:10%}.split h3{font-family:var(--sans);font-weight:600;font-size:clamp(36px,4.4vw,64px);line-height:1.08;letter-spacing:-.065em}.about-content p{margin-bottom:22px}.bio-facts{border-top:1px solid var(--rule);padding:23px 0 12px;margin-top:30px}.bio-facts .bio-location{font-weight:700;color:var(--ink);font-size:18px;line-height:1.5;margin-bottom:10px}.bio-location span{color:var(--burgundy)}.bio-facts .bio-roles{font-weight:600;color:var(--ink);font-size:15px;margin-bottom:7px}.bio-facts .bio-history{font-size:14px;margin-bottom:12px}.contact-grid h2{font-family:var(--sans);font-weight:600;letter-spacing:-.055em;line-height:1.08}.journal-photo{margin:0 0 35px}.journal-photo img{display:block;width:100%;height:auto;max-height:780px;object-fit:contain;background:#221912}.journal-photo figcaption{font-size:13px;color:var(--soft);margin-top:11px;line-height:1.5}.share-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;border-top:1px solid var(--rule);padding:22px 0;margin-top:35px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;font-weight:700}.share-row a{color:var(--blue)}
+@media(max-width:850px){.split{grid-template-columns:1fr;gap:16px}.hero h1{font-size:clamp(48px,10.5vw,88px)}}
+@media(max-width:430px){.hero h1{font-size:clamp(43px,11.2vw,58px)}.nav{gap:16px;font-size:10px}.contact-link{font-size:15px}}
+
+/* Revision 08: approved article editorial emphasis */
+.article .pull .judgment{color:var(--blue)}
+.article .article-invitation{font-size:16px;line-height:1.65;border-top:1px solid var(--rule);padding-top:22px;margin-top:20px}
+.article .article-invitation a{overflow-wrap:anywhere}
