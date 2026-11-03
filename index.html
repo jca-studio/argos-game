@@ -902,28 +902,28 @@ function GuessDeck({code,room}){
       <div className="flex justify-center gap-2 py-2 bg-[#F3EAD6] shrink-0">
         {positions.map((p,i)=><button key={i} onClick={()=>setCur(i)} className={"w-3 h-3 rounded-full transition "+(i===cur?"bg-[#C8102E] scale-125":parseFloat(vals[i])>0?"bg-[#174A2B]":"bg-[#d9c9a6]")}/>)}
       </div>
-      <div className="flex-1 min-h-0 overflow-auto no-scrollbar px-5 py-3">
-        <div className="h-full flex flex-col sm:flex-row sm:items-center sm:justify-center gap-3 sm:gap-10 max-w-3xl mx-auto">
+      <div className="flex-1 min-h-0 overflow-auto no-scrollbar flex items-center justify-center px-5 py-4">
+        <div className="w-full max-w-3xl flex flex-col sm:flex-row sm:items-center sm:justify-center gap-4 sm:gap-10">
           <div className="flex flex-col items-center shrink-0">
             <Photo idx={room.order[pos]} reveal={false} cls="h-56 sm:h-64"/>
             <div className="font-display font-bold text-lg text-center mt-3 max-w-xs leading-tight">{item.name}</div>
             {item.desc && <div className="text-[#8a7a5f] text-xs text-center mt-0.5 max-w-xs leading-snug">{item.desc}</div>}
           </div>
-          <div className="flex flex-col items-center w-full sm:w-auto">
+          <div className="flex flex-col items-center w-full sm:w-72">
             <label className="text-[#8a7a5f] text-xs font-bold">Your price guess</label>
             <div className="font-display font-extrabold text-4xl text-[#C8102E] mb-2 tnum">£{vals[cur]||"0"}</div>
             <Keypad val={vals[cur]} setVal={setVal}/>
+            <div className="flex gap-3 items-stretch w-full max-w-[320px] mt-4">
+              <button onClick={()=>setCur(c=>Math.max(0,c-1))} disabled={cur===0} className="rounded-xl px-5 bg-black/5 text-[#1A1410] font-bold text-xl disabled:opacity-30">←</button>
+              {cur<positions.length-1
+                ? <Btn tone="red" className="flex-1 py-3.5 text-lg" disabled={!(parseFloat(vals[cur])>0)} onClick={()=>setCur(c=>c+1)}>Next item →</Btn>
+                : <Btn tone="pine" className="flex-1 py-3.5 text-lg" disabled={!allIn} onClick={submit}>🔒 Submit all {positions.length}</Btn>}
+            </div>
+            {cur===positions.length-1 && !allIn && <div className="text-center text-[#8a7a5f] text-[11px] mt-2">Put a price on every item — {filled}/{positions.length} done.</div>}
             <div className="text-[#8a7a5f] text-[11px] mt-2">Tap <b>.</b> for pennies</div>
           </div>
         </div>
       </div>
-      <div className="p-3 flex gap-3 items-stretch shrink-0 border-t border-[#E6D9BF]">
-        <button onClick={()=>setCur(c=>Math.max(0,c-1))} disabled={cur===0} className="rounded-xl px-5 bg-black/5 text-[#1A1410] font-bold text-xl disabled:opacity-30">←</button>
-        {cur<positions.length-1
-          ? <Btn tone="red" className="flex-1 py-3.5 text-lg" disabled={!(parseFloat(vals[cur])>0)} onClick={()=>setCur(c=>c+1)}>Next item →</Btn>
-          : <Btn tone="pine" className="flex-1 py-3.5 text-lg" disabled={!allIn} onClick={submit}>🔒 Submit all {positions.length}</Btn>}
-      </div>
-      {cur===positions.length-1 && !allIn && <div className="text-center text-[#8a7a5f] text-[11px] pb-2 shrink-0">Put a price on every item — {filled}/{positions.length} done. Tap the dots to go back.</div>}
     </div>
   );
 }
