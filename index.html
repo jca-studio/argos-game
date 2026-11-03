@@ -944,6 +944,13 @@ function icsHref(startAt,code,title){
   const body=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Argos Game//EN","CALSCALE:GREGORIAN","BEGIN:VEVENT","UID:argos-"+code+"@jca-studio","DTSTAMP:"+dt(Date.now()),"DTSTART:"+dt(startAt),"DTEND:"+dt(startAt+1800000),"SUMMARY:"+sum,"DESCRIPTION:Join the Argos Game (room "+code+"): "+url,"URL:"+url,"END:VEVENT","END:VCALENDAR"].join("\r\n");
   return "data:text/calendar;charset=utf-8,"+encodeURIComponent(body);
 }
+function gcalHref(startAt,code,title){
+  const dt=d=>new Date(d).toISOString().replace(/[-:]/g,"").replace(/\.\d{3}/,"");
+  const url=location.origin+location.pathname+"?code="+code;
+  const text=(title?title+" — ":"")+"The Argos Game";
+  const details="Join the Argos Game (room "+code+"): "+url;
+  return "https://calendar.google.com/calendar/render?action=TEMPLATE&text="+encodeURIComponent(text)+"&dates="+dt(startAt)+"/"+dt(startAt+1800000)+"&details="+encodeURIComponent(details);
+}
 function GameScreen({code,room,isHost,onLeave}){
   const [showSheet,setShowSheet]=useState(false);
   const [,setTick]=useState(0);
@@ -967,7 +974,13 @@ function GameScreen({code,room,isHost,onLeave}){
         <QR text={joinUrl} size={190}/>
         <Btn tone="gold" className="mt-4 w-full max-w-xs py-3" onClick={share}>🔗 Share invite link</Btn>
         {!(room.startAt && Date.now()<room.startAt) && <Btn tone="ghost" className="mt-2 w-full max-w-xs py-3" onClick={shareTV}>📺 Show scoreboard on a TV</Btn>}
-        {room.startAt && Date.now()<room.startAt && <a href={icsHref(room.startAt,code,room.title)} download={"argos-game-"+code+".ics"} className="mt-2 w-full max-w-xs py-3 rounded-xl font-bold text-center bg-white/10 hover:bg-white/20 text-white ring-1 ring-white/25">🗓️ Add to calendar</a>}
+        {room.startAt && Date.now()<room.startAt && <div className="mt-2 w-full max-w-xs">
+          <div className="text-white/55 text-xs text-center font-bold mb-1">🗓️ Add to calendar</div>
+          <div className="flex gap-2">
+            <a href={gcalHref(room.startAt,code,room.title)} target="_blank" rel="noopener" className="flex-1 py-2.5 rounded-xl font-bold text-center text-sm bg-white/10 hover:bg-white/20 text-white ring-1 ring-white/25">Google</a>
+            <a href={icsHref(room.startAt,code,room.title)} download={"argos-game-"+code+".ics"} className="flex-1 py-2.5 rounded-xl font-bold text-center text-sm bg-white/10 hover:bg-white/20 text-white ring-1 ring-white/25">Apple / Outlook</a>
+          </div>
+        </div>}
         <div className="text-white/50 text-xs mt-1">or just tell people the code above</div>
         <div className="w-full max-w-sm mt-6">
           <div className="text-xs uppercase tracking-widest font-bold text-white/60 mb-2">In the game ({players.length})</div>
