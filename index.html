@@ -992,7 +992,7 @@ function GameScreen({code,room,isHost,onLeave}){
                 <div className="text-white/60 text-xs uppercase tracking-widest font-bold mb-1">Game starts in</div>
                 <Countdown to={room.startAt}/>
                 <div className="text-white/70 text-sm mt-1">{fmtWhen(room.startAt)} · your time</div>
-                {isHost && <button onClick={()=>hostStart(code,room)} className="text-white/45 text-xs underline mt-3 block mx-auto">Everyone's here — start early</button>}
+                {isHost && <Btn tone="gold" className="w-full py-3 mt-4" onClick={()=>hostStart(code,room)}>Everyone's here — start game ▶</Btn>}
               </div>
             : (isHost
                 ? <Btn tone="pine" className="w-full py-4 text-lg" disabled={players.length<1} onClick={()=>hostStart(code,room)}>Start game ▶</Btn>
