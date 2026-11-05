@@ -692,55 +692,96 @@ function hostReveal(code,room){ if(!room||room.phase!=="guessing") return; roomR
 function hostNext(code,room){ if(!room||room.phase!=="reveal") return; const r=room.round+1; if(r>=ROUNDS){ roomRef(code).update({phase:"final"}); return; } roomRef(code).update({round:r,phase:"guessing"}); }
 
 /* ====================== screens ====================== */
-function Landing({onStart,onJoin,prefillCode}){
-  const [name,setName]=useState(""); const [code,setCode]=useState(prefillCode||"");
+function Landing({onStart,onJoin,onSchedule,onPractice,prefillCode}){
   const invited=!!prefillCode;
-  const steps=[
-    "Everyone joins on their own phone with the room code or the shared link.",
-    "Flip through the products and put your price on each — 3 rounds of 6 items.",
-    "Closest guess scores 1 point. Spot-on scores 2. A tie? Everyone tied scores.",
-    "After every round you'll all see everyone's guesses and the real prices.",
-    "Highest total after 3 rounds wins. Pop the scoreboard on a TV if you've got one."
+  const [mode,setMode]=useState(invited?"join":null);
+  const [name,setName]=useState("");
+  const [code,setCode]=useState(prefillCode||"");
+  const [when,setWhen]=useState(()=>{ const d=new Date(Date.now()+3600000); d.setMinutes(Math.ceil(d.getMinutes()/15)*15,0,0); const p=n=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+"T"+p(d.getHours())+":"+p(d.getMinutes()); });
+  const [title,setTitle]=useState("");
+  const nameLen=name.trim().length;
+  const rules=[
+    "Everyone plays on their own phone. Start a game, share the link, and people hop in.",
+    "3 rounds, 6 products each. You'll see a product and tap in what you reckon it costs (pennies count).",
+    "Closest guess scores 1 point. Spot-on scores 2. Ties all score.",
+    "After each round: a round winner and everyone's guesses. Highest total after 3 rounds wins."
   ];
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-[#CE3320] to-[#AE2817] text-white flex flex-col items-center px-6 py-8">
-      <Trevor size={116} cls="mb-2"/>
-      <div className="font-hand text-[#E7C96B] text-xl">Christmas Day</div>
-      <div className="font-display font-extrabold text-4xl mb-2 text-center">The Argos Game</div>
-      <div className="text-white/80 mb-6 text-center max-w-sm">Guess the Argos price. Everyone plays on their own phone.</div>
-      <div className="w-full max-w-sm bg-white/10 rounded-2xl p-5 ring-1 ring-white/15">
-        <label className="block text-sm font-bold text-white mb-1">Your name</label>
-        <input value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Jenna" maxLength={14} className="w-full rounded-xl px-4 py-3 bg-white text-[#1A1410] font-semibold outline-none ring-2 ring-transparent focus:ring-white"/>
-        {invited ? (
-          <div className="mt-4">
-            <div className="text-white/70 text-sm mb-2">You're joining room <b className="text-[#C9A646] font-display tracking-widest">{code}</b></div>
-            <Btn tone="gold" className="w-full py-3.5 text-lg" disabled={name.trim().length<1} onClick={()=>onJoin(code,name)}>Join game →</Btn>
-          </div>
-        ) : (
-          <div className="mt-4 space-y-4">
-            <Btn tone="pine" className="w-full py-3.5 text-lg" disabled={name.trim().length<1} onClick={()=>onStart(name)}>Start a new game</Btn>
-            <div className="flex items-center gap-3 text-white/40 text-xs"><div className="flex-1 h-px bg-white/15"/>or join one<div className="flex-1 h-px bg-white/15"/></div>
-            <div>
-              <label className="block text-sm font-bold text-[#E7C96B] mb-1">Room code</label>
-              <input value={code} onChange={e=>setCode(e.target.value.replace(/\D/g,"").slice(0,4))} inputMode="numeric" placeholder="0000" className="w-full rounded-xl px-4 py-3 bg-[#FFF6DD] text-[#8a6d12] border-2 border-[#C9A646] font-display font-extrabold text-2xl tracking-[0.4em] text-center outline-none placeholder:text-[#d8c88a]"/>
-              <Btn tone="gold" className="w-full py-3 mt-2" disabled={name.trim().length<1||code.length!==4} onClick={()=>onJoin(code,name)}>Join game →</Btn>
-            </div>
-          </div>
-        )}
-      </div>
-      <div className="w-full max-w-sm mt-5 bg-white/5 rounded-2xl p-5 ring-1 ring-white/10">
-        <div className="font-display font-extrabold text-lg text-[#E7C96B] mb-3">How to play</div>
-        <div className="space-y-2.5">
-          {steps.map((s,i)=>(<div key={i} className="flex items-start gap-3">
-            <div className="w-6 h-6 rounded-full bg-[#C9A646] text-[#2a1e05] font-bold text-sm grid place-items-center shrink-0 mt-0.5">{i+1}</div>
-            <div className="text-sm text-white/85 leading-snug">{s}</div>
-          </div>))}
-        </div>
-      </div>
-      <div className="text-white/50 text-xs mt-5 max-w-sm text-center">Whoever starts also plays and runs the rounds. Share the link from the lobby so everyone can jump in.</div>
+  const header=(<React.Fragment>
+    <Trevor size={110} cls="mb-2"/>
+    <div className="font-hand text-[#E7C96B] text-xl">Christmas Day</div>
+    <div className="font-display font-extrabold text-4xl mb-2 text-center">The Argos Game</div>
+  </React.Fragment>);
+  const shell=children=>(<div className="min-h-screen bg-gradient-to-b from-[#CE3320] to-[#AE2817] text-white flex flex-col items-center px-6 py-8">{header}{children}</div>);
+  const nameField=(<div className="w-full"><label className="block text-sm font-bold text-white mb-1">Your name</label>
+    <input value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Jenna" maxLength={14} className="w-full rounded-xl px-4 py-3 bg-white text-[#1A1410] font-semibold outline-none ring-2 ring-transparent focus:ring-white"/></div>);
+  const back=(<button onClick={()=>setMode(null)} className="self-start text-white/60 text-sm mb-2">← back</button>);
+
+  if(mode===null) return shell(<React.Fragment>
+    <div className="text-white/80 mb-6 text-center max-w-sm">Guess the Argos price. Everyone plays on their own phone.</div>
+    <div className="w-full max-w-sm space-y-3">
+      <Btn tone="pine" className="w-full py-4 text-lg" onClick={()=>setMode("start")}>▶  Start a game now</Btn>
+      <Btn tone="gold" className="w-full py-4 text-lg" onClick={()=>setMode("join")}>👥  Join a game</Btn>
+      <Btn tone="ghost" className="w-full py-4 text-lg" onClick={()=>setMode("schedule")}>📅  Schedule for later</Btn>
     </div>
-  );
+    <button onClick={()=>setMode("practice")} className="text-white/55 text-sm underline underline-offset-2 mt-3">🤖 Just trying it out? Practice vs the computer</button>
+    <div className="w-full max-w-sm mt-6 bg-white/5 rounded-2xl p-5 ring-1 ring-white/10">
+      <div className="font-display font-extrabold text-lg text-[#E7C96B] mb-3">How to play</div>
+      <div className="space-y-2.5">{rules.map((s,i)=>(<div key={i} className="flex items-start gap-3">
+        <div className="w-6 h-6 rounded-full bg-[#C9A646] text-[#2a1e05] font-bold text-sm grid place-items-center shrink-0 mt-0.5">{i+1}</div>
+        <div className="text-sm text-white/85 leading-snug">{s}</div></div>))}</div>
+    </div>
+    <button onClick={()=>{location.href=location.pathname+"?tv=1";}} className="text-white/45 text-xs underline mt-5">📺 Setting up a TV? Open scoreboard mode</button>
+  </React.Fragment>);
+
+  if(mode==="start") return shell(<div className="w-full max-w-sm bg-white/10 rounded-2xl p-5 ring-1 ring-white/15 mt-2">
+    {back}
+    <div className="font-display font-extrabold text-xl mb-3">Start a game now</div>
+    {nameField}
+    <Btn tone="pine" className="w-full py-3.5 text-lg mt-4" disabled={nameLen<1} onClick={()=>onStart(name)}>Start game →</Btn>
+    <div className="text-white/50 text-xs mt-2 text-center">You'll host and play. Share the link on the next screen.</div>
+  </div>);
+
+  if(mode==="practice") return shell(<div className="w-full max-w-sm bg-white/10 rounded-2xl p-5 ring-1 ring-white/15 mt-2">
+    {back}
+    <div className="font-display font-extrabold text-xl mb-3">Practice vs the computer</div>
+    {nameField}
+    <div className="text-white/60 text-xs mt-2">A quick solo game against two computer players (Trevor &amp; Connie), so you can see how it works. Nobody else needed.</div>
+    <Btn tone="gold" className="w-full py-3.5 text-lg mt-4" disabled={nameLen<1} onClick={()=>onPractice(name)}>Start practice →</Btn>
+  </div>);
+
+  if(mode==="join") return shell(<div className="w-full max-w-sm bg-white/10 rounded-2xl p-5 ring-1 ring-white/15 mt-2">
+    {!invited && back}
+    <div className="font-display font-extrabold text-xl mb-3">Join a game</div>
+    {nameField}
+    <div className="mt-4">
+      {invited
+        ? <div className="text-white/70 text-sm">Joining room <b className="text-[#C9A646] font-display tracking-widest">{code}</b></div>
+        : <React.Fragment><label className="block text-sm font-bold text-[#E7C96B] mb-1">Room code</label>
+           <input value={code} onChange={e=>setCode(e.target.value.replace(/\D/g,"").slice(0,4))} inputMode="numeric" placeholder="0000" className="w-full rounded-xl px-4 py-3 bg-[#FFF6DD] text-[#8a6d12] border-2 border-[#C9A646] font-display font-extrabold text-2xl tracking-[0.4em] text-center outline-none placeholder:text-[#d8c88a]"/></React.Fragment>}
+    </div>
+    <Btn tone="gold" className="w-full py-3.5 text-lg mt-3" disabled={nameLen<1||code.length!==4} onClick={()=>onJoin(code,name)}>Join game →</Btn>
+    {invited && <div className="mt-4 pt-4 border-t border-white/10"><div className="text-xs uppercase tracking-widest font-bold text-white/50 mb-2">How to play</div><div className="space-y-1.5">{rules.map((s,i)=>(<div key={i} className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-[#C9A646] text-[#2a1e05] font-bold text-[11px] grid place-items-center shrink-0 mt-0.5">{i+1}</div><div className="text-xs text-white/80 leading-snug">{s}</div></div>))}</div></div>}
+  </div>);
+
+  if(mode==="schedule") return shell(<div className="w-full max-w-sm bg-white/10 rounded-2xl p-5 ring-1 ring-white/15 mt-2">
+    {back}
+    <div className="font-display font-extrabold text-xl mb-3">Schedule a game</div>
+    {nameField}
+    <div className="mt-4">
+      <label className="block text-sm font-bold text-[#E7C96B] mb-1">Game name</label>
+      <input value={title} onChange={e=>setTitle(e.target.value)} placeholder="e.g. Cozy Gang Christmas" maxLength={30} className="w-full rounded-xl px-4 py-3 bg-white text-[#1A1410] font-semibold outline-none"/>
+    </div>
+    <div className="mt-4">
+      <label className="block text-sm font-bold text-[#E7C96B] mb-1">Game starts at</label>
+      <input type="datetime-local" value={when} onChange={e=>setWhen(e.target.value)} className="w-full rounded-xl px-3 py-3 bg-white text-[#1A1410] font-semibold outline-none"/>
+      <div className="text-white/50 text-[11px] mt-1">Everyone sees this in their own timezone, with a countdown on the link.</div>
+    </div>
+    <Btn tone="gold" className="w-full py-3.5 text-lg mt-3" disabled={nameLen<1||!when} onClick={()=>onSchedule(name,when,title)}>Schedule game →</Btn>
+  </div>);
+
+  return null;
 }
+
 function roastRound(room,rd){
   const base=rd*PER_ROUND; const positions=[]; for(let i=0;i<PER_ROUND;i++){const p=base+i; if(p<room.order.length)positions.push(p);}
   const players=playerList(room);
@@ -759,10 +800,61 @@ function roastRound(room,rd){
   const rw=ids.slice().sort((a,b)=>spend[b].rpts-spend[a].rpts)[0];
   return {best,worst,bigSpender:bs?spend[bs]:null,roundWinner:rw?spend[rw]:null};
 }
-function RoundRoast({room,rd,isHost,onSheet,onNext,last}){
+function RulesOverlay({onClose}){
+  const steps=[
+    ["Everyone's on their own phone","Start a game and share the link. People hop in with the link or the 4-digit room code."],
+    ["Guess the price","3 rounds, 6 products each. You'll see a product and tap in what you reckon it costs. Pennies count."],
+    ["Closest scores","Closest guess scores 1 point. Spot-on scores 2. Ties all score."],
+    ["Round by round","After each round: a round winner and everyone's guesses. Highest total after 3 rounds wins."]
+  ];
+  return (<div className="min-h-screen bg-gradient-to-b from-[#CE3320] to-[#AE2817] text-white flex flex-col items-center px-6 py-8 overflow-auto no-scrollbar">
+    <Trevor size={96} cls="mb-2"/>
+    <div className="font-hand text-[#E7C96B] text-lg">How to play</div>
+    <div className="font-display font-extrabold text-3xl mb-5 text-center">The Argos Game</div>
+    <div className="w-full max-w-sm space-y-3">
+      {steps.map((s,i)=>(<div key={i} className="flex items-start gap-3 bg-white/10 rounded-2xl p-4 ring-1 ring-white/10">
+        <div className="w-7 h-7 rounded-full bg-[#C9A646] text-[#2a1e05] font-bold grid place-items-center shrink-0">{i+1}</div>
+        <div><div className="font-display font-bold text-lg leading-tight">{s[0]}</div><div className="text-white/80 text-sm leading-snug mt-0.5">{s[1]}</div></div>
+      </div>))}
+    </div>
+    <div className="w-full max-w-sm mt-6 flex flex-col items-center gap-2">
+      <Btn tone="gold" className="w-full py-3.5 text-lg" onClick={onClose}>Got it — let's play ▶</Btn>
+      <button onClick={onClose} className="text-white/50 text-sm underline">Skip</button>
+    </div>
+  </div>);
+}
+function YourRound({room,rd}){
+  const me=room.players&&room.players[myId]; if(!me) return null;
+  const base=rd*PER_ROUND; const rows=[];
+  for(let i=0;i<PER_ROUND;i++){ const pos=base+i; if(pos>=room.order.length)break; const it=POOL[room.order[pos]]||{}; const sc=scorePos(room,pos); const r=sc.res[myId]||{}; rows.push({it,pos,price:sc.price,g:r.guess,pts:r.pts}); }
+  return (<div className="bg-white/10 rounded-2xl p-3 ring-1 ring-white/10">
+    <div className="text-[11px] uppercase tracking-widest font-bold text-white/60 mb-2">Your round — what you guessed vs the real price</div>
+    <div className="space-y-1.5">{rows.map(r=>(
+      <div key={r.pos} className="flex items-center gap-2 text-sm">
+        <div className="w-9 h-9 bg-white rounded p-0.5 shrink-0 flex items-center justify-center">{r.it.code?<ArgImg code={r.it.code} v={r.it.v} size={120} className="max-w-full max-h-full object-contain"/>:<span className="text-sm">🏷️</span>}</div>
+        <div className="flex-1 min-w-0 truncate text-white/85">{r.it.name}</div>
+        <div className="text-right shrink-0 tnum"><span className="text-white/50">you </span><b className="text-white">{r.g!=null?gbp(r.g):"—"}</b><span className="text-white/30"> · </span><b className="text-[#C9A646]">{gbp(r.price)}</b></div>
+        <div className={"w-7 text-right font-bold shrink-0 "+(r.pts?"text-[#9BE5A0]":"text-white/25")}>{r.pts?"+"+r.pts:"·"}</div>
+      </div>))}
+    </div>
+  </div>);
+}
+function RoundRoast({room,rd,isHost,onSheet,onNext,last,onLeave}){
   const r=roastRound(room,rd);
   const short=s=>s&&s.length>24?s.slice(0,24)+"…":s;
-  const quip = r.worst ? `${r.worst.name} looked at a ${short(r.worst.item)} and said ${gbp(r.worst.g)}. It was ${gbp(r.worst.price)}. Trevor needs a lie down.` : "Trevor is quietly impressed.";
+  const LINES=[
+    w=>`${w.name} looked at a ${short(w.item)} and said ${gbp(w.g)}. It was ${gbp(w.price)}. Trevor has questions.`,
+    w=>`${gbp(w.g)} for a ${short(w.item)}, ${w.name}? It was ${gbp(w.price)}. Bold. Wrong, but bold.`,
+    w=>`Trevor checked twice. The ${short(w.item)} was ${gbp(w.price)}, not ${w.name}'s ${gbp(w.g)}.`,
+    w=>`${w.name} was a cool ${gbp(w.err)} off. In the wrong direction, mostly.`,
+    w=>`Somewhere a calculator is crying. ${w.name} said ${gbp(w.g)}, it was ${gbp(w.price)}.`,
+    w=>`The ${short(w.item)} is not ${gbp(w.g)}, ${w.name}. It has never been ${gbp(w.g)}.`,
+    w=>`Trevor admires the confidence — ${gbp(w.g)} on a ${gbp(w.price)} ${short(w.item)}.`,
+    w=>`Put the catalogue down, ${w.name}. ${gbp(w.g)}? It was ${gbp(w.price)}.`,
+    w=>`${w.name} rounded to the nearest dream: ${gbp(w.g)} vs ${gbp(w.price)}.`
+  ];
+  const NOWORST=["Trevor is quietly impressed.","No disasters this round. Trevor is almost disappointed.","A tidy round — Trevor had nothing to work with."];
+  const quip = r.worst ? LINES[(rd*7 + (r.worst.name?r.worst.name.length:0))%LINES.length](r.worst) : NOWORST[rd%NOWORST.length];
   const Big=({rec,emoji,label,good})=> rec? (
     <div className={"rounded-2xl p-3 ring-1 "+(good?"bg-[#174A2B]/45 ring-[#9BE5A0]/40":"bg-black/25 ring-white/15")}>
       <div className="flex items-center gap-3">
@@ -791,10 +883,12 @@ function RoundRoast({room,rd,isHost,onSheet,onNext,last}){
           {r.roundWinner&&<div className="bg-white/10 rounded-2xl p-3 ring-1 ring-white/10"><div className="text-xl">👑</div><div className="text-[11px] uppercase tracking-wide font-bold text-white/60">Round winner</div><div className="font-display font-extrabold text-lg text-[#9BE5A0] leading-tight">{r.roundWinner.name}</div><div className="text-[11px] text-white/60">+{r.roundWinner.rpts} points</div></div>}
         </div>
         <div className="bg-black/20 rounded-2xl p-3 text-center font-hand text-lg text-[#E7C96B]">"{quip}"</div>
+        <YourRound room={room} rd={rd}/>
       </div>
       <div className="mt-6 max-w-md mx-auto w-full flex flex-col gap-2">
         <Btn tone="gold" className="w-full py-3" onClick={onSheet}>📋 See everyone's scoresheet</Btn>
         {isHost && <Btn tone="pine" className="w-full py-3" onClick={onNext}>{last?"Skip to final results 🏆":"Next round →"}</Btn>}
+        <button onClick={onLeave} className="text-white/40 text-xs underline mx-auto mt-1">Leave game</button>
       </div>
     </div>
   );
@@ -810,35 +904,69 @@ function GuessDeck({code,room}){
   const allIn=filled===positions.length;
   const submit=()=>{ const up={submittedRound:room.round}; positions.forEach((p,i)=>{ up["guesses/"+p]=parseFloat(vals[i])||0; }); roomRef(code).child("players/"+myId).update(up); };
   return (
-    <div className="min-h-screen bg-[#FBF6EC] text-[#1A1410] flex flex-col">
-      <div className="bg-[#C8102E] text-white px-5 py-3 flex items-center justify-between">
-        <div className="font-bold">Round {room.round+1} of {ROUNDS}</div>
+    <div className="h-[100dvh] bg-[#FBF6EC] text-[#1A1410] flex flex-col overflow-hidden">
+      <div className="bg-[#C8102E] text-white px-5 py-3 flex items-center justify-between shrink-0">
+        <div className="font-bold">Round {room.round+1} of {ROUNDS}{room.practice?" · Practice":""}</div>
         <div className="text-sm font-semibold tnum">Item {cur+1} / {positions.length}</div>
       </div>
-      <div className="flex justify-center gap-2 py-2.5 bg-[#F3EAD6]">
+      <div className="flex justify-center gap-2 py-2 bg-[#F3EAD6] shrink-0">
         {positions.map((p,i)=><button key={i} onClick={()=>setCur(i)} className={"w-3 h-3 rounded-full transition "+(i===cur?"bg-[#C8102E] scale-125":parseFloat(vals[i])>0?"bg-[#174A2B]":"bg-[#d9c9a6]")}/>)}
       </div>
-      <div className="flex-1 flex flex-col items-center px-6 pt-4 overflow-auto no-scrollbar">
-        <Photo idx={room.order[pos]} reveal={false} cls="h-60"/>
-        <div className="font-display font-bold text-lg text-center mt-3">{item.name}</div>
-        {item.desc && <div className="text-[#8a7a5f] text-xs text-center mb-2">{item.desc}</div>}
-        <label className="text-[#8a7a5f] text-xs font-bold mb-1">Your price guess</label>
-        <div className="font-display font-extrabold text-4xl text-[#C8102E] mb-3 tnum">£{vals[cur]||"0"}</div>
-        <Keypad val={vals[cur]} setVal={setVal}/>
-        <div className="text-[#8a7a5f] text-xs mt-3">Tap <b>.</b> for pennies, e.g. 24.99</div>
+      <div className="flex-1 min-h-0 overflow-auto no-scrollbar flex items-center justify-center px-5 py-4">
+        <div className="w-full max-w-3xl flex flex-col sm:flex-row sm:items-center sm:justify-center gap-4 sm:gap-10">
+          <div className="flex flex-col items-center shrink-0">
+            <Photo idx={room.order[pos]} reveal={false} cls="h-56 sm:h-64"/>
+            <div className="font-display font-bold text-lg text-center mt-3 max-w-xs leading-tight">{item.name}</div>
+            {item.desc && <div className="text-[#8a7a5f] text-xs text-center mt-0.5 max-w-xs leading-snug">{item.desc}</div>}
+          </div>
+          <div className="flex flex-col items-center w-full sm:w-72">
+            <label className="text-[#8a7a5f] text-xs font-bold">Your price guess</label>
+            <div className="font-display font-extrabold text-4xl text-[#C8102E] mb-2 tnum">£{vals[cur]||"0"}</div>
+            <Keypad val={vals[cur]} setVal={setVal}/>
+            <div className="flex gap-3 items-stretch w-full max-w-[320px] mt-4">
+              <button onClick={()=>setCur(c=>Math.max(0,c-1))} disabled={cur===0} className="rounded-xl px-5 bg-black/5 text-[#1A1410] font-bold text-xl disabled:opacity-30">←</button>
+              {cur<positions.length-1
+                ? <Btn tone="red" className="flex-1 py-3.5 text-lg" disabled={!(parseFloat(vals[cur])>0)} onClick={()=>setCur(c=>c+1)}>Next item →</Btn>
+                : <Btn tone="pine" className="flex-1 py-3.5 text-lg" disabled={!allIn} onClick={submit}>🔒 Submit all {positions.length}</Btn>}
+            </div>
+            {cur===positions.length-1 && !allIn && <div className="text-center text-[#8a7a5f] text-[11px] mt-2">Put a price on every item — {filled}/{positions.length} done.</div>}
+            <div className="text-[#8a7a5f] text-[11px] mt-2">Tap <b>.</b> for pennies</div>
+          </div>
+        </div>
       </div>
-      <div className="p-4 flex gap-3 items-stretch">
-        <button onClick={()=>setCur(c=>Math.max(0,c-1))} disabled={cur===0} className="rounded-xl px-5 bg-black/5 text-[#1A1410] font-bold text-xl disabled:opacity-30">←</button>
-        {cur<positions.length-1
-          ? <Btn tone="red" className="flex-1 py-4 text-lg" disabled={!(parseFloat(vals[cur])>0)} onClick={()=>setCur(c=>c+1)}>Next item →</Btn>
-          : <Btn tone="pine" className="flex-1 py-4 text-lg" disabled={!allIn} onClick={submit}>🔒 Submit all {positions.length}</Btn>}
-      </div>
-      {cur===positions.length-1 && !allIn && <div className="text-center text-[#8a7a5f] text-xs pb-3 -mt-1">Put a price on every item to submit — {filled}/{positions.length} done. Tap the dots to go back.</div>}
     </div>
   );
 }
-function GameScreen({code,room,isHost}){
+function fmtWhen(ms){ try{ return new Date(ms).toLocaleString(undefined,{weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}); }catch(e){ return new Date(ms).toString(); } }
+function Countdown({to,big}){
+  const [now,setNow]=useState(Date.now());
+  useEffect(()=>{ const t=setInterval(()=>setNow(Date.now()),1000); return ()=>clearInterval(t); },[]);
+  let s=Math.max(0,Math.floor((to-now)/1000));
+  const d=Math.floor(s/86400); s-=d*86400; const h=Math.floor(s/3600); s-=h*3600; const m=Math.floor(s/60); const sec=s-m*60;
+  const pad=n=>String(n).padStart(2,"0");
+  const label = d>0 ? (d+"d "+h+"h "+pad(m)+"m") : (h>0 ? (h+":"+pad(m)+":"+pad(sec)) : (m+":"+pad(sec)));
+  return <span className={"font-display font-extrabold tnum text-[#E7C96B] "+(big?"text-6xl":"text-4xl")}>{label}</span>;
+}
+function icsHref(startAt,code,title){
+  const dt=d=>new Date(d).toISOString().replace(/[-:]/g,"").replace(/\.\d{3}/,"");
+  const url=location.origin+location.pathname+"?code="+code;
+  const sum=(title?title+" — ":"")+"The Argos Game 🎄";
+  const body=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Argos Game//EN","CALSCALE:GREGORIAN","BEGIN:VEVENT","UID:argos-"+code+"@jca-studio","DTSTAMP:"+dt(Date.now()),"DTSTART:"+dt(startAt),"DTEND:"+dt(startAt+1800000),"SUMMARY:"+sum,"DESCRIPTION:Join the Argos Game (room "+code+"): "+url,"URL:"+url,"END:VEVENT","END:VCALENDAR"].join("\r\n");
+  return "data:text/calendar;charset=utf-8,"+encodeURIComponent(body);
+}
+function gcalHref(startAt,code,title){
+  const dt=d=>new Date(d).toISOString().replace(/[-:]/g,"").replace(/\.\d{3}/,"");
+  const url=location.origin+location.pathname+"?code="+code;
+  const text=(title?title+" — ":"")+"The Argos Game";
+  const details="Join the Argos Game (room "+code+"): "+url;
+  return "https://calendar.google.com/calendar/render?action=TEMPLATE&text="+encodeURIComponent(text)+"&dates="+dt(startAt)+"/"+dt(startAt+1800000)+"&details="+encodeURIComponent(details);
+}
+function GameScreen({code,room,isHost,onLeave}){
   const [showSheet,setShowSheet]=useState(false);
+  const [showTV,setShowTV]=useState(false);
+  const [tvCopied,setTvCopied]=useState(false);
+  const [,setTick]=useState(0);
+  useEffect(()=>{ if(!room||!room.startAt) return; const t=setInterval(()=>setTick(x=>x+1),1000); return ()=>clearInterval(t); },[room&&room.startAt]);
   useEffect(()=>{ setShowSheet(false); },[room&&room.phase,room&&room.round]);
   if(!room) return <Splash msg="Loading game…"/>;
   const me=room.players&&room.players[myId];
@@ -851,24 +979,48 @@ function GameScreen({code,room,isHost}){
     const shareTV=async()=>{ try{ if(navigator.share){ await navigator.share({title:"Argos Game scoreboard",text:"Open the Argos Game scoreboard on the TV",url:tvUrl}); } else { await navigator.clipboard.writeText(tvUrl); alert("TV scoreboard link copied — open it in a browser on your TV."); } }catch(e){} };
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#CE3320] to-[#AE2817] text-white flex flex-col items-center px-6 py-8 overflow-auto no-scrollbar">
-        <div className="font-hand text-[#E7C96B] text-lg">Christmas Day</div>
-        <div className="font-display font-extrabold text-3xl mb-4">The Argos Game</div>
+        <div className="font-hand text-[#E7C96B] text-lg">{room.title?"The Argos Game":"Christmas Day"}</div>
+        <div className="font-display font-extrabold text-3xl mb-4 text-center">{room.title||"The Argos Game"}</div>
         <div className="text-white/70 text-xs uppercase tracking-widest font-bold mb-1">Room code</div>
         <div className="font-display font-extrabold text-6xl tracking-[0.2em] text-[#C9A646] tnum mb-4">{code}</div>
         <QR text={joinUrl} size={190}/>
         <Btn tone="gold" className="mt-4 w-full max-w-xs py-3" onClick={share}>🔗 Share invite link</Btn>
-        <Btn tone="ghost" className="mt-2 w-full max-w-xs py-3" onClick={shareTV}>📺 Show scoreboard on a TV</Btn>
+        {!(room.startAt && Date.now()<room.startAt) && <Btn tone="ghost" className="mt-2 w-full max-w-xs py-3" onClick={()=>setShowTV(v=>!v)}>📺 Show scoreboard on a TV</Btn>}
+        {showTV && !(room.startAt && Date.now()<room.startAt) && <div className="mt-2 w-full max-w-xs bg-black/25 rounded-xl p-3 ring-1 ring-white/15 text-center">
+          <div className="text-white/80 text-sm mb-2">On a TV's web browser, open <b>jca-studio.github.io/argos-game</b>, tap <b>scoreboard mode</b>, and enter code <b className="text-[#C9A646] tnum">{code}</b> with the remote. Or open this link on the TV directly:</div>
+          <div className="text-[11px] text-white/70 break-all bg-black/25 rounded-lg px-2 py-1.5 mb-2 select-all">{tvUrl}</div>
+          <Btn tone="gold" className="w-full py-2.5" onClick={async()=>{ try{ await navigator.clipboard.writeText(tvUrl); setTvCopied(true); setTimeout(()=>setTvCopied(false),1800); }catch(e){ setTvCopied(false); } }}>{tvCopied?"Copied ✓":"Copy TV link"}</Btn>
+        </div>}
+        {room.startAt && Date.now()<room.startAt && <div className="mt-2 w-full max-w-xs">
+          <div className="text-white/55 text-xs text-center font-bold mb-1">🗓️ Add to calendar</div>
+          <div className="flex gap-2">
+            <a href={gcalHref(room.startAt,code,room.title)} target="_blank" rel="noopener" className="flex-1 py-2.5 rounded-xl font-bold text-center text-sm bg-white/10 hover:bg-white/20 text-white ring-1 ring-white/25">Google</a>
+            <a href={icsHref(room.startAt,code,room.title)} download={"argos-game-"+code+".ics"} className="flex-1 py-2.5 rounded-xl font-bold text-center text-sm bg-white/10 hover:bg-white/20 text-white ring-1 ring-white/25">Apple / Outlook</a>
+          </div>
+        </div>}
         <div className="text-white/50 text-xs mt-1">or just tell people the code above</div>
         <div className="w-full max-w-sm mt-6">
           <div className="text-xs uppercase tracking-widest font-bold text-white/60 mb-2">In the game ({players.length})</div>
           <div className="flex flex-wrap gap-2">{players.map(p=>(<div key={p.id} className="flex items-center gap-2 bg-white/10 rounded-full pl-1 pr-3 py-1"><div className="w-6 h-6 rounded-full grid place-items-center text-xs font-bold" style={{background:p.color}}>{(p.name||"?")[0].toUpperCase()}</div><span className="text-sm font-semibold">{p.name}{p.id===myId?" (you)":""}</span></div>))}</div>
         </div>
         <div className="w-full max-w-xs mt-8">
-          {isHost
-            ? <Btn tone="pine" className="w-full py-4 text-lg" disabled={players.length<1} onClick={()=>hostStart(code,room)}>Start game ▶</Btn>
-            : <div className="text-center text-white/75 bg-white/10 rounded-xl py-3">Waiting for the host to start…</div>}
+          {room.startAt && Date.now()<room.startAt
+            ? <div className="text-center bg-white/10 rounded-2xl py-5 px-3 ring-1 ring-[#C9A646]/30">
+                <div className="text-white/60 text-xs uppercase tracking-widest font-bold mb-1">Game starts in</div>
+                <Countdown to={room.startAt}/>
+                <div className="text-white/70 text-sm mt-1">{fmtWhen(room.startAt)} · your time</div>
+                {isHost && <Btn tone="gold" className="w-full py-3 mt-4" onClick={()=>hostStart(code,room)}>Everyone's here — start game ▶</Btn>}
+              </div>
+            : (isHost
+                ? <Btn tone="pine" className="w-full py-4 text-lg" disabled={players.length<1} onClick={()=>hostStart(code,room)}>Start game ▶</Btn>
+                : <div className="text-center bg-white/10 rounded-2xl py-4 px-4">
+                    <div className="font-display font-bold text-lg mb-1">You're in! 🎉</div>
+                    <div className="text-white/75 text-sm">This is a group game — {(room.players&&room.host&&room.players[room.host]?room.players[room.host].name:"the host")} starts it when everyone's here. Keep this page open and it'll jump in automatically.</div>
+                  </div>)}
         </div>
         <div className="text-white/45 text-xs mt-4 max-w-xs text-center">3 rounds · 6 items each · closest guess scores</div>
+        {isHost && typeof Notification!=="undefined" && Notification.permission!=="granted" && <button onClick={()=>{try{Notification.requestPermission();}catch(e){}}} className="text-[#E7C96B] text-xs underline mt-3">🔔 Alert me when players join</button>}
+        <button onClick={onLeave} className="text-white/40 text-xs underline mt-3">Leave this game</button>
       </div>
     );
   }
@@ -876,14 +1028,19 @@ function GameScreen({code,room,isHost}){
   if(room.phase==="guessing"){
     const submitted=me&&(me.submittedRound==null?-1:me.submittedRound)>=room.round;
     if(!submitted) return <GuessDeck code={code} room={room}/>;
-    const nSub=players.filter(p=>(p.submittedRound==null?-1:p.submittedRound)>=room.round).length;
+    const subd=p=>(p.submittedRound==null?-1:p.submittedRound)>=room.round;
+    const nSub=players.filter(subd).length; const waiting=players.filter(p=>!subd(p));
     return (<Center bg="pine">
       <div className="text-5xl mb-3">✅</div>
       <div className="font-display font-extrabold text-2xl">You're in!</div>
-      <div className="text-white/70 mb-4">Round {room.round+1} locked. Waiting for everyone else…</div>
+      <div className="text-white/70 mb-4">Round {room.round+1} locked.</div>
       <div className="font-display font-extrabold text-5xl text-[#E7C96B] tnum">{nSub}<span className="text-white/40">/{players.length}</span></div>
-      <div className="text-white/60 text-sm uppercase tracking-widest font-bold mt-1">submitted</div>
-      {isHost && nSub<players.length && <div className="mt-6"><Btn tone="gold" onClick={()=>hostReveal(code,room)}>Reveal now (skip the slowpokes)</Btn></div>}
+      <div className="text-white/60 text-sm uppercase tracking-widest font-bold mt-1 mb-4">locked in</div>
+      {waiting.length>0 ? (<div className="w-full max-w-xs">
+        <div className="text-white/50 text-xs uppercase tracking-widest font-bold mb-2">Still guessing</div>
+        <div className="flex flex-wrap justify-center gap-2">{waiting.map(p=>(<div key={p.id} className="flex items-center gap-2 bg-white/10 rounded-full pl-1 pr-3 py-1"><div className="w-6 h-6 rounded-full grid place-items-center text-xs font-bold text-white" style={{background:p.color}}>{(p.name||"?")[0].toUpperCase()}</div><span className="text-sm font-semibold">{p.name}</span></div>))}</div>
+      </div>) : <div className="text-[#9BE5A0] font-semibold">Everyone's in — revealing…</div>}
+      {isHost && nSub<players.length && <div className="mt-6 flex flex-col items-center gap-1.5"><Btn tone="gold" onClick={()=>hostReveal(code,room)}>Reveal prices now →</Btn><div className="text-white/50 text-xs max-w-[16rem]">Ends the round for everyone and shows the answers. Anyone still guessing just misses this round.</div></div>}
     </Center>);
   }
 
@@ -891,7 +1048,7 @@ function GameScreen({code,room,isHost}){
     const base=room.round*PER_ROUND; const idxs=[]; for(let i=0;i<PER_ROUND;i++){const p=base+i; if(p<room.order.length)idxs.push(p);}
     const last=room.round+1>=ROUNDS;
     const myRp=me?roundPtsFor(room,myId,room.round):0;
-    if(!showSheet) return <RoundRoast room={room} rd={room.round} isHost={isHost} onSheet={()=>setShowSheet(true)} onNext={()=>hostNext(code,room)} last={last}/>;
+    if(!showSheet) return <RoundRoast room={room} rd={room.round} isHost={isHost} onSheet={()=>setShowSheet(true)} onNext={()=>hostNext(code,room)} last={last} onLeave={onLeave}/>;
     return (<div className="min-h-screen bg-gradient-to-b from-[#CE3320] to-[#AE2817] text-white flex flex-col items-center px-4 py-6 overflow-auto no-scrollbar">
       <button onClick={()=>setShowSheet(false)} className="self-start text-white/60 text-sm mb-1">← back to the roast</button>
       <div className="font-display font-extrabold text-2xl text-[#C9A646] mb-1 text-center">Round {room.round+1} scoresheet</div>
@@ -901,12 +1058,13 @@ function GameScreen({code,room,isHost}){
       {isHost
         ? <Btn tone="gold" className="mt-6 px-6 py-3" onClick={()=>hostNext(code,room)}>{last?"See final results 🏆":"Next round →"}</Btn>
         : <div className="text-white/50 text-sm mt-6">Waiting for the host to continue…</div>}
+      <button onClick={onLeave} className="text-white/40 text-xs underline mt-4">Leave game</button>
     </div>);
   }
 
   if(room.phase==="final"){
     const onAgain=()=>{ const players={}; Object.entries(room.players||{}).forEach(([id,p])=>players[id]={name:p.name,color:p.color,guesses:{},submittedRound:-1}); roomRef(code).update({phase:"lobby",round:0,order:shuffledOrder().slice(0,TOTAL_N),players}); };
-    return <div className="min-h-screen bg-gradient-to-b from-[#CE3320] to-[#AE2817] text-white flex flex-col"><Final room={room} isHost={isHost} onAgain={onAgain}/></div>;
+    return <div className="min-h-screen bg-gradient-to-b from-[#CE3320] to-[#AE2817] text-white flex flex-col"><Final room={room} isHost={isHost} onAgain={onAgain} onLeave={onLeave}/></div>;
   }
   return <Splash msg="One moment…"/>;
 }
@@ -916,7 +1074,7 @@ function ScoreSheet({room,idxs,title}){
   if(!positions.length||!players.length) return <div className="text-white/60 text-sm text-center">Nothing to show yet.</div>;
   return (
     <div className="bg-[#FBF6EC] text-[#1A1410] rounded-2xl p-3 sm:p-5 overflow-x-auto no-scrollbar shadow-xl ring-1 ring-black/10">
-      {title && <div className="text-center mb-4"><div className="font-display font-extrabold text-2xl sm:text-3xl text-[#1A1410]">Christmas Day Argos Game</div><div className="font-hand text-[#8a7a5f] text-lg">Trevor reads out the prices…</div></div>}
+      {title && <div className="text-center mb-4"><div className="font-display font-extrabold text-2xl sm:text-3xl text-[#1A1410]">Christmas Day Argos Game</div><div className="font-hand text-[#8a7a5f] text-lg">The real prices, and what everyone guessed</div></div>}
       <table className="text-sm" style={{borderCollapse:"collapse",width:"100%",minWidth:230+players.length*78}}>
         <thead><tr className="border-b-2 border-[#E6D9BF]">
           <th className="text-left p-2 text-[#8a7a5f] font-bold">Item</th>
@@ -924,18 +1082,20 @@ function ScoreSheet({room,idxs,title}){
           {players.map(p=><th key={p.id} className={"p-2 font-bold whitespace-nowrap "+(p.id===myId?"bg-[#F3EAD6]":"")} style={{color:p.color}}>{p.name}{p.id===myId?" (you)":""}</th>)}
         </tr></thead>
         <tbody>
-          {positions.map((pos,ri)=>{ const sc=scorePos(room,pos); const it=POOL[room.order[pos]]||{};
-            return (<tr key={pos} className="border-b border-[#E6D9BF]">
+          {(()=>{ const multiRound=new Set(positions.map(p=>Math.floor(p/PER_ROUND))).size>1; let prev=-1; return positions.map((pos,ri)=>{ const sc=scorePos(room,pos); const it=POOL[room.order[pos]]||{}; const rnd=Math.floor(pos/PER_ROUND); const itemNo=(pos%PER_ROUND)+1; const sep=multiRound&&rnd!==prev; prev=rnd;
+            return (<React.Fragment key={pos}>
+              {sep&&<tr className="bg-[#efe4cb]"><td colSpan={2+players.length} className="px-2 py-1.5 font-display font-extrabold text-[#8a6d12] text-xs uppercase tracking-widest">Round {rnd+1}</td></tr>}
+              <tr className="border-b border-[#E6D9BF]">
               <td className="p-2"><div className="flex items-center gap-2.5">
-                <div className="relative shrink-0"><div className="w-20 h-20 bg-white rounded-lg ring-1 ring-black/5 flex items-center justify-center p-1">{it.code?<ArgImg code={it.code} v={it.v} size={200} className="max-w-full max-h-full object-contain"/>:<span className="text-xl">🏷️</span>}</div><div className="absolute -top-2 -left-2 w-6 h-6 rounded-full bg-[#C8102E] text-white text-xs font-bold grid place-items-center ring-2 ring-[#FBF6EC]">{ri+1}</div></div>
+                <div className="relative shrink-0"><div className="w-20 h-20 bg-white rounded-lg ring-1 ring-black/5 flex items-center justify-center p-1">{it.code?<ArgImg code={it.code} v={it.v} size={200} className="max-w-full max-h-full object-contain"/>:<span className="text-xl">🏷️</span>}</div><div className="absolute -top-2 -left-2 w-6 h-6 rounded-full bg-[#C8102E] text-white text-xs font-bold grid place-items-center ring-2 ring-[#FBF6EC]">{itemNo}</div></div>
                 <span className="text-sm font-semibold leading-tight" style={{maxWidth:160}}>{it.name}</span></div></td>
               <td className="p-2 text-center font-display font-extrabold text-[#C8102E] tnum whitespace-nowrap">{gbp(sc.price)}</td>
               {players.map(p=>{ const r=sc.res[p.id]||{}; const v=r.guess;
                 return <td key={p.id} className={"p-2 text-center tnum whitespace-nowrap "+(p.id===myId?"bg-[#F3EAD6]/60":"")}>{v!=null
                   ? <span className={r.spot?"inline-block px-2 py-0.5 rounded-full bg-[#C9A646] text-[#2a1e05] font-extrabold":r.win?"inline-block px-2 py-0.5 rounded-full bg-[#C8102E] text-white font-bold":"text-[#4a4032]"}>{r.spot?"👑 ":""}{gbp(v)}</span>
                   : <span className="text-[#bbb]">—</span>}</td>;})}
-            </tr>);
-          })}
+            </tr></React.Fragment>);
+          }); })()}
           <tr className="border-t-2 border-[#C8102E]">
             <td className="p-2 font-display font-bold">Total points</td><td/>
             {players.map(p=><td key={p.id} className={"p-2 text-center font-display font-extrabold text-lg tnum "+(p.id===myId?"bg-[#F3EAD6]":"")}>{p._t}</td>)}
@@ -977,7 +1137,7 @@ function Awards({room}){
     </div>
   </div>);
 }
-function Final({room,onAgain,isHost}){
+function Final({room,onAgain,isHost,onLeave}){
   const ps=playerList(room).map(p=>({...p,_t:totalFor(room,p.id)})).sort((a,b)=>b._t-a._t);
   const win=ps[0];
   return (<div className="flex-1 overflow-auto no-scrollbar px-4 py-6">
@@ -989,7 +1149,7 @@ function Final({room,onAgain,isHost}){
     </div>
     <div className="max-w-3xl mx-auto"><ScoreSheet room={room} title/></div>
     <div className="max-w-md mx-auto"><Awards room={room}/></div>
-    <div className="text-center mt-5">{isHost? <Btn tone="pine" onClick={onAgain}>↺ Play again</Btn> : <div className="text-white/60 text-sm">The host can start a new game.</div>}</div>
+    <div className="text-center mt-5 flex flex-col items-center gap-3">{isHost? <Btn tone="pine" onClick={onAgain}>↺ Play again</Btn> : <div className="text-white/60 text-sm">The host can start a new game.</div>}<button onClick={onLeave} className="text-white/40 text-xs underline">Leave game</button></div>
   </div>);
 }
 function PlayerScreen(){ return null; }
@@ -1026,7 +1186,7 @@ function SetupNeeded(){
 /* ---- root: pick role, subscribe to room ---- */
 function TVCodeEntry({onCode}){
   const [c,setC]=useState("");
-  return (<Center><div className="text-5xl mb-3">📺</div><div className="font-display font-extrabold text-2xl mb-1">TV scoreboard</div><div className="text-white/70 mb-4 text-sm">Enter the room code shown on a player's phone.</div>
+  return (<Center><div className="text-5xl mb-3">📺</div><div className="font-display font-extrabold text-2xl mb-1">TV scoreboard</div><div className="text-white/70 mb-4 text-sm">Type the 4-digit room code from a player's phone — your TV remote's number buttons work.</div>
     <input value={c} onChange={e=>setC(e.target.value.replace(/\D/g,"").slice(0,4))} inputMode="numeric" placeholder="0000" className="rounded-xl px-4 py-3 bg-[#FFF6DD] text-[#8a6d12] border-2 border-[#C9A646] font-display font-extrabold text-3xl tracking-[0.4em] text-center outline-none w-52"/>
     <div className="mt-4"><Btn tone="gold" disabled={c.length!==4} onClick={()=>onCode(c)}>Show scoreboard</Btn></div>
   </Center>);
@@ -1037,15 +1197,15 @@ function TVScreen({code,room}){
   const players=playerList(room);
   if(room.phase==="lobby"){
     return (<div className="min-h-screen bg-gradient-to-b from-[#CE3320] to-[#AE2817] text-white flex flex-col items-center justify-center px-8 py-8">
-      <div className="font-hand text-[#E7C96B] text-2xl">Christmas Day</div>
-      <div className="font-display font-extrabold text-6xl mb-8 text-center">The Argos Game</div>
+      <div className="font-hand text-[#E7C96B] text-2xl">{room.title?"The Argos Game":"Christmas Day"}</div>
+      <div className="font-display font-extrabold text-6xl mb-8 text-center">{room.title||"The Argos Game"}</div>
       <div className="flex flex-col sm:flex-row items-center gap-10">
         <div className="text-center"><div className="text-white/60 uppercase tracking-widest font-bold mb-3">Scan to join</div><QR text={joinUrl} size={240}/></div>
         <div className="text-center"><div className="text-white/60 uppercase tracking-widest font-bold mb-2">Room code</div><div className="font-display font-extrabold text-8xl tracking-[0.12em] text-[#C9A646] tnum">{code}</div></div>
       </div>
       <div className="mt-10 w-full max-w-3xl"><div className="text-center text-white/60 uppercase tracking-widest font-bold mb-3">In the game ({players.length})</div>
         <div className="flex flex-wrap justify-center gap-3">{players.map(p=>(<div key={p.id} className="flex items-center gap-2 bg-white/10 rounded-full pl-1.5 pr-4 py-1.5"><div className="w-8 h-8 rounded-full grid place-items-center font-bold text-white" style={{background:p.color}}>{(p.name||"?")[0].toUpperCase()}</div><span className="text-lg font-semibold">{p.name}</span></div>))}</div></div>
-      <div className="mt-10 text-white/50 text-lg">Waiting for the host to start…</div>
+      {room.startAt && Date.now()<room.startAt ? <div className="mt-10 text-center"><div className="text-white/60 uppercase tracking-widest font-bold text-sm mb-1">Game starts in</div><Countdown to={room.startAt} big/><div className="text-white/70 mt-1">{fmtWhen(room.startAt)}</div></div> : <div className="mt-10 text-white/50 text-lg">Waiting for the host to start…</div>}
     </div>);
   }
   if(room.phase==="guessing"){
@@ -1092,13 +1252,31 @@ function TVScreen({code,room}){
 }
 
 /* ---- root: pick role, subscribe to room ---- */
+function pingJoin(name){
+  try{ const AC=window.AudioContext||window.webkitAudioContext; if(AC){ const ac=new AC(); const o=ac.createOscillator(),g=ac.createGain(); o.connect(g); g.connect(ac.destination); o.type="sine"; o.frequency.setValueAtTime(660,ac.currentTime); o.frequency.setValueAtTime(990,ac.currentTime+0.13); g.gain.setValueAtTime(0.0001,ac.currentTime); g.gain.exponentialRampToValueAtTime(0.3,ac.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+0.45); o.start(); o.stop(ac.currentTime+0.45); setTimeout(()=>{try{ac.close();}catch(e){}},700); } }catch(e){}
+  try{ if(navigator.vibrate) navigator.vibrate(140); }catch(e){}
+  try{ if(window.Notification && Notification.permission==="granted") new Notification("The Argos Game 🎄",{body:(name||"Someone")+" joined your game"}); }catch(e){}
+}
 function App(){
   const params=new URLSearchParams(location.search);
   const isTV = params.get("tv")==="1";
+  const savedCode = (()=>{ try{ return localStorage.getItem("argosRoom")||""; }catch(e){ return ""; } })();
   const [joined,setJoined]=useState(false);
   const [code,setCode]=useState(params.get("code")||"");
   const [room,setRoom]=useState(null);
   const [err,setErr]=useState("");
+  const [resuming,setResuming]=useState(!isTV && FB_OK && !!(params.get("code")||savedCode));
+  const saveRoom=c=>{ try{localStorage.setItem("argosRoom",c);}catch(e){} };
+  // drop back into a game this device already belongs to (survives reloads / being "kicked out")
+  useEffect(()=>{ if(isTV||!FB_OK){ setResuming(false); return; }
+    const c=params.get("code")||savedCode; if(!c){ setResuming(false); return; }
+    roomRef(c).get().then(s=>{
+      const mine=s.child("players/"+myId).exists(); const ph=s.child("phase").val();
+      if(mine && ph!=="final"){ setCode(c); setJoined(true); saveRoom(c); }
+      else if(params.get("code")){ setCode(params.get("code")); }
+      setResuming(false);
+    }).catch(()=>setResuming(false));
+  },[]);
   const subscribed = (isTV && !!code) || joined;
   useEffect(()=>{ if(!subscribed||!code||!FB_OK) return;
     const ref=roomRef(code); const cb=ref.on("value",s=>setRoom(s.val())); return ()=>ref.off("value",cb);
@@ -1108,13 +1286,33 @@ function App(){
   useEffect(()=>{ if(!isHost||!room||room.phase!=="guessing") return;
     if(allSubmitted(room)){ const t=setTimeout(()=>hostReveal(code,room),500); return ()=>clearTimeout(t); }
   },[isHost,room&&room.phase,room&&room.round,subKey]);
+  // practice: computer players auto-guess so one person can play a full game
+  useEffect(()=>{ if(!isHost||!room||!room.practice||room.phase!=="guessing") return;
+    const base=room.round*PER_ROUND;
+    Object.entries(room.players||{}).forEach(([id,p])=>{ if(p.bot && (p.submittedRound==null?-1:p.submittedRound)<room.round){
+      const delay=900+Math.random()*2600;
+      setTimeout(()=>{ const up={submittedRound:room.round}; for(let i=0;i<PER_ROUND;i++){ const pos=base+i; if(pos<room.order.length){ const price=POOL[room.order[pos]].gbp||10; const fac=0.4+Math.random()*1.7; up["guesses/"+pos]=Math.max(1,Math.round(price*fac*100)/100); } } roomRef(code).child("players/"+id).update(up); },delay);
+    }});
+  },[isHost,room&&room.practice,room&&room.phase,room&&room.round]);
+  // ping the host when someone new joins the lobby
+  const prevIds=useRef([]);
+  useEffect(()=>{ if(!isHost||!room||room.phase!=="lobby"||room.practice){ prevIds.current=playerList(room).map(p=>p.id); return; }
+    const ids=playerList(room).map(p=>p.id);
+    const added=ids.filter(id=>!prevIds.current.includes(id) && id!==myId);
+    if(prevIds.current.length>0 && added.length){ const p=room.players[added[0]]; pingJoin(p&&p.name); }
+    prevIds.current=ids;
+  },[isHost,room&&room.phase,room&&room.practice,subKey]);
   if(!FB_OK) return <SetupNeeded/>;
   if(isTV){ if(!code) return <TVCodeEntry onCode={setCode}/>; return <TVScreen code={code} room={room}/>; }
   function makePlayer(name){ const color=COLORS[Math.abs([...(name||"x")].reduce((a,ch)=>a+ch.charCodeAt(0),0))%COLORS.length]||COLORS[0]; return {name:name||"Player",color,guesses:{},submittedRound:-1}; }
-  function startGame(name){ name=(name||"").trim()||"Host"; const c=randCode(); roomRef(c).set({host:myId,phase:"lobby",round:0,order:shuffledOrder().slice(0,TOTAL_N),players:{[myId]:makePlayer(name)},createdAt:Date.now()}).then(()=>{setCode(c);setJoined(true);}).catch(e=>setErr(String(e))); }
-  function joinGame(c,name){ name=(name||"").trim(); roomRef(c).get().then(s=>{ if(!s.exists()){ setErr("No game with code "+c+". Double-check it."); return; } roomRef(c).child("players/"+myId).update(makePlayer(name)).then(()=>{setCode(c);setJoined(true);}); }).catch(e=>setErr(String(e))); }
-  if(!joined) return (<div>{err&&<div className="fixed top-3 inset-x-3 z-50 bg-[#8F0A20] text-white text-sm rounded-xl px-4 py-2 text-center shadow-lg">{err}</div>}<Landing onStart={startGame} onJoin={joinGame} prefillCode={code}/></div>);
-  return <GameScreen code={code} room={room} isHost={isHost}/>;
+  function leaveGame(){ try{localStorage.removeItem("argosRoom");}catch(e){} setJoined(false); setRoom(null); setCode(""); setErr(""); try{ if(params.get("code")) history.replaceState(null,"",location.pathname); }catch(e){} }
+  function startGame(name){ name=(name||"").trim()||"Host"; const c=randCode(); roomRef(c).set({host:myId,phase:"lobby",round:0,order:shuffledOrder().slice(0,TOTAL_N),players:{[myId]:makePlayer(name)},createdAt:Date.now()}).then(()=>{ saveRoom(c); setCode(c); setJoined(true); }).catch(e=>setErr(String(e))); }
+  function startPractice(name){ name=(name||"").trim()||"You"; const c=randCode(); const BOTS=[{id:"bot_trev",name:"Trevor 🤖",color:"#4E9B36"},{id:"bot_con",name:"Connie 🤖",color:"#B83280"}]; const players={[myId]:makePlayer(name)}; BOTS.forEach(b=>{players[b.id]={name:b.name,color:b.color,guesses:{},submittedRound:-1,bot:true};}); roomRef(c).set({host:myId,phase:"guessing",round:0,practice:true,order:shuffledOrder().slice(0,TOTAL_N),players,createdAt:Date.now()}).then(()=>{ saveRoom(c); setCode(c); setJoined(true); }).catch(e=>setErr(String(e))); }
+  function scheduleGame(name,whenStr,title){ name=(name||"").trim()||"Host"; const startAt=new Date(whenStr).getTime(); if(!startAt||isNaN(startAt)){ setErr("Pick a valid date and time."); return; } const c=randCode(); const r={host:myId,phase:"lobby",round:0,startAt,order:shuffledOrder().slice(0,TOTAL_N),players:{[myId]:makePlayer(name)},createdAt:Date.now()}; const tt=(title||"").trim(); if(tt) r.title=tt; roomRef(c).set(r).then(()=>{ saveRoom(c); setCode(c); setJoined(true); }).catch(e=>setErr(String(e))); }
+  function joinGame(c,name){ name=(name||"").trim(); roomRef(c).get().then(s=>{ if(!s.exists()){ setErr("No game with code "+c+". Double-check it."); return; } const ex=s.child("players/"+myId).val(); const color=(ex&&ex.color)?ex.color:(COLORS[Math.abs([...(name||"x")].reduce((a,ch)=>a+ch.charCodeAt(0),0))%COLORS.length]||COLORS[0]); const upd=ex?{name,color}:{name,color,guesses:{},submittedRound:-1}; roomRef(c).child("players/"+myId).update(upd).then(()=>{ saveRoom(c); setCode(c); setJoined(true); }); }).catch(e=>setErr(String(e))); }
+  if(resuming) return <Splash msg="Reconnecting…"/>;
+  if(!joined) return (<div>{err&&<div className="fixed top-3 inset-x-3 z-50 bg-[#8F0A20] text-white text-sm rounded-xl px-4 py-2 text-center shadow-lg">{err}</div>}<Landing onStart={startGame} onJoin={joinGame} onSchedule={scheduleGame} onPractice={startPractice} prefillCode={code}/></div>);
+  return <GameScreen code={code} room={room} isHost={isHost} onLeave={leaveGame}/>;
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
