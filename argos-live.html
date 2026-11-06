@@ -1082,6 +1082,7 @@ function GameScreen({code,room,isHost,onLeave}){
         <div className="flex flex-wrap justify-center gap-2">{waiting.map(p=>(<div key={p.id} className="flex items-center gap-2 bg-white/10 rounded-full pl-1 pr-3 py-1"><div className="w-6 h-6 rounded-full grid place-items-center text-xs font-bold text-white" style={{background:p.color}}>{(p.name||"?")[0].toUpperCase()}</div><span className="text-sm font-semibold">{p.name}</span></div>))}</div>
       </div>) : <div className="text-[#9BE5A0] font-semibold">Everyone's in — revealing…</div>}
       {isHost && nSub<players.length && <div className="mt-6 flex flex-col items-center gap-1.5"><Btn tone="gold" onClick={()=>hostReveal(code,room)}>Reveal prices now →</Btn><div className="text-white/50 text-xs max-w-[16rem]">Ends the round for everyone and shows the answers. Anyone still guessing just misses this round.</div></div>}
+      <button onClick={onLeave} className="text-white/50 text-xs underline mt-6">Leave game</button>
     </Center>);
   }
 
@@ -1302,6 +1303,7 @@ function pingJoin(name){
 function App(){
   const params=new URLSearchParams(location.search);
   const isTV = params.get("tv")==="1";
+  if(params.get("home")==="1"){ try{ localStorage.removeItem("argosRoom"); history.replaceState(null,"",location.pathname); }catch(e){} }
   const savedCode = (()=>{ try{ return localStorage.getItem("argosRoom")||""; }catch(e){ return ""; } })();
   const [joined,setJoined]=useState(false);
   const [code,setCode]=useState(params.get("code")||"");
