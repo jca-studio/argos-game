@@ -3,10 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>The Argos Game · Live</title>
+<title>Clarkos · A family Christmas game</title>
+<meta name="theme-color" content="#A8121A">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2216%22 fill=%22%23C8161E%22/%3E%3Ctext x=%2232%22 y=%2246%22 font-family=%22Arial Black,Arial%22 font-weight=%22900%22 font-size=%2240%22 text-anchor=%22middle%22 fill=%22%23FFF3DC%22%3EC%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Hanken+Grotesk:wght@400;500;600;700;800&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800;900&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.26.4/babel.min.js"></script>
@@ -15,9 +17,40 @@
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-database-compat.js"></script>
 <script src="https://cdn.tailwindcss.com/3.4.16"></script>
 <style>
-  html,body{margin:0;background:#AE2817;}
-  body{font-family:"Hanken Grotesk",system-ui,sans-serif;}
-  .font-display{font-family:"Fraunces",serif;}
+  html,body{margin:0;background:#9E1018;}
+  body{font-family:"Nunito",system-ui,sans-serif;}
+  .font-display{font-family:"Fredoka","Nunito",sans-serif;letter-spacing:.005em;}
+  /* ---- Clarkos look ---- */
+  .clarkos-bg{background-color:#A8121A;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420' viewBox='0 0 420 420'%3E%3Cg fill='%23FFC93C'%3E%3Cpath d='M48 30l3 9 9 3-9 3-3 9-3-9-9-3 9-3z' opacity='.85'/%3E%3Cpath d='M352 250l2 6 6 2-6 2-2 6-2-6-6-2 6-2z' opacity='.6'/%3E%3Cpath d='M190 380l2 5 5 2-5 2-2 5-2-5-5-2 5-2z' opacity='.45'/%3E%3C/g%3E%3Cg fill='%23FFF3DC' opacity='.45'%3E%3Ccircle cx='260' cy='60' r='2'/%3E%3Ccircle cx='120' cy='210' r='1.6'/%3E%3Ccircle cx='400' cy='380' r='1.8'/%3E%3C/g%3E%3Cg fill='none' stroke-linecap='round' stroke-width='5'%3E%3Cpath d='M290 150q8-10 18-4t18-4' stroke='%23F28A1E' opacity='.45'/%3E%3Cpath d='M40 300q6 10 16 6t16 8' stroke='%232F5BD8' opacity='.35'/%3E%3C/g%3E%3C/svg%3E"),
+      radial-gradient(ellipse 90% 55% at 50% -5%,rgba(255,120,90,.35),transparent 70%),
+      radial-gradient(ellipse 70% 50% at 0% 100%,rgba(70,0,6,.45),transparent 70%),
+      radial-gradient(ellipse 70% 50% at 100% 85%,rgba(70,0,6,.35),transparent 70%),
+      linear-gradient(180deg,#C51C24 0%,#A8121A 55%,#8C0C13 100%);
+    background-attachment:fixed;background-size:420px 420px,100% 100%,100% 100%,100% 100%,100% 100%;}
+  .clarkos-bg.green{background-color:#1B6B2C;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420' viewBox='0 0 420 420'%3E%3Cg fill='%23FFC93C'%3E%3Cpath d='M48 30l3 9 9 3-9 3-3 9-3-9-9-3 9-3z' opacity='.85'/%3E%3Cpath d='M352 250l2 6 6 2-6 2-2 6-2-6-6-2 6-2z' opacity='.6'/%3E%3Cpath d='M190 380l2 5 5 2-5 2-2 5-2-5-5-2 5-2z' opacity='.45'/%3E%3C/g%3E%3Cg fill='%23FFF3DC' opacity='.45'%3E%3Ccircle cx='260' cy='60' r='2'/%3E%3Ccircle cx='120' cy='210' r='1.6'/%3E%3Ccircle cx='400' cy='380' r='1.8'/%3E%3C/g%3E%3Cg fill='none' stroke-linecap='round' stroke-width='5'%3E%3Cpath d='M290 150q8-10 18-4t18-4' stroke='%23F28A1E' opacity='.45'/%3E%3Cpath d='M40 300q6 10 16 6t16 8' stroke='%232F5BD8' opacity='.35'/%3E%3C/g%3E%3C/svg%3E"),
+      radial-gradient(ellipse 90% 55% at 50% -5%,rgba(160,230,120,.25),transparent 70%),
+      linear-gradient(180deg,#2A8A3A 0%,#1B6B2C 60%,#11501F 100%);
+    background-size:420px 420px,100% 100%,100% 100%;background-attachment:fixed;}
+  .clk-panel{background:rgba(110,6,12,.42);box-shadow:inset 0 0 0 1.5px rgba(255,201,60,.42),0 10px 26px rgba(60,0,4,.22);backdrop-filter:blur(2px);}
+  .clarkos-bg.green .clk-panel{background:rgba(6,50,18,.42);}
+  .clk-quote{background:rgba(110,6,12,.5);box-shadow:inset 0 0 0 2px rgba(255,201,60,.65);}
+  .clk-card{background:#FFF5E4;box-shadow:0 0 0 3px #F3C969,0 14px 30px rgba(60,0,4,.28);}
+  /* logo: cream ticket, chunky red word, navy ribbon, holly */
+  .clk-logo{display:flex;flex-direction:column;align-items:center;position:relative;filter:drop-shadow(0 8px 14px rgba(60,0,4,.35));}
+  .clk-ticket{background:#FFF3DC;padding:.14em .55em .08em;transform:rotate(-2deg);
+    -webkit-mask:radial-gradient(circle at 0 50%,transparent .32em,#000 .34em) left/51% 100% no-repeat,radial-gradient(circle at 100% 50%,transparent .32em,#000 .34em) right/51% 100% no-repeat;
+            mask:radial-gradient(circle at 0 50%,transparent .32em,#000 .34em) left/51% 100% no-repeat,radial-gradient(circle at 100% 50%,transparent .32em,#000 .34em) right/51% 100% no-repeat;}
+  .clk-word{font-family:"Fredoka",sans-serif;font-weight:700;color:#C8161E;line-height:1;display:block;letter-spacing:.01em;
+    text-shadow:0 .045em 0 #8E0F16,0 .09em 0 rgba(142,15,22,.35);}
+  .clk-ribbon{position:relative;margin-top:-.35em;transform:rotate(-1deg);background:#1F3B8C;color:#fff;font-family:"Fredoka",sans-serif;font-weight:600;
+    padding:.28em 1.1em .32em;border-radius:6px;box-shadow:inset 0 0 0 2px #F3C969;white-space:nowrap;}
+  .clk-ribbon:before,.clk-ribbon:after{content:"";position:absolute;top:.35em;width:1em;height:100%;background:#16296A;z-index:-1;}
+  .clk-ribbon:before{left:-.7em;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,35% 50%);}
+  .clk-ribbon:after{right:-.7em;clip-path:polygon(0 0,100% 0,65% 50%,100% 100%,0 100%);}
+  .clk-holly{position:absolute;top:-.62em;left:50%;transform:translateX(-50%);width:1.3em;z-index:2;}
+  .clk-key{background:#FFF9EE;box-shadow:0 3px 0 #E5CBA1,0 0 0 1px rgba(150,90,40,.12);font-family:"Fredoka",sans-serif;}
   .font-hand{font-family:"Kalam",cursive;}
   .tnum{font-variant-numeric:tabular-nums;}
   .no-scrollbar::-webkit-scrollbar{display:none;} .no-scrollbar{scrollbar-width:none;}
@@ -47,7 +80,7 @@ window.ARGOS_FIREBASE_CONFIG = {
 
 <script type="text/babel" data-presets="react">
 const {useState,useEffect,useRef} = React;
-const TREVOR_SVG = `<svg width="118" height="131" viewBox="0 0 220 244" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Trevor the dinosaur wearing a Santa hat"><path d="M72 182 Q22 184 16 150 Q42 166 80 160 Z" fill="#4E9B36"/><path d="M60 176 l-14 -4 l10 -9 Z" fill="#E8812E"/><path d="M44 170 l-14 -2 l9 -10 Z" fill="#E8812E"/><ellipse cx="90" cy="216" rx="24" ry="16" fill="#4E9B36"/><ellipse cx="142" cy="216" rx="24" ry="16" fill="#57A639"/><circle cx="76" cy="222" r="5" fill="#E8812E"/><circle cx="90" cy="225" r="5" fill="#E8812E"/><circle cx="104" cy="222" r="5" fill="#E8812E"/><circle cx="128" cy="222" r="5" fill="#E8812E"/><circle cx="142" cy="225" r="5" fill="#E8812E"/><circle cx="156" cy="222" r="5" fill="#E8812E"/><path d="M60 152 Q54 74 116 70 Q178 74 172 152 Q170 208 116 208 Q62 208 60 152 Z" fill="#5CA83C"/><ellipse cx="117" cy="154" rx="40" ry="52" fill="#CBE8A6"/><path d="M68 138 q-15 6 -13 23 q11 -9 18 -8 Z" fill="#57A639"/><path d="M164 138 q15 6 13 23 q-11 -9 -18 -8 Z" fill="#4E9B36"/><circle cx="99" cy="112" r="15" fill="#fff"/><circle cx="135" cy="112" r="15" fill="#fff"/><circle cx="102" cy="114" r="6.5" fill="#222"/><circle cx="132" cy="114" r="6.5" fill="#222"/><circle cx="104.3" cy="111" r="2.1" fill="#fff"/><circle cx="134.3" cy="111" r="2.1" fill="#fff"/><circle cx="84" cy="132" r="7" fill="#F6A96B" opacity=".55"/><circle cx="150" cy="132" r="7" fill="#F6A96B" opacity=".55"/><path d="M98 138 Q117 160 137 138 Q117 150 98 138 Z" fill="#7a3b23"/><path d="M98 138 Q117 153 137 138" fill="none" stroke="#3a6b26" stroke-width="3" stroke-linecap="round"/><path d="M106 143 l4 6 l4 -6 Z" fill="#fff"/><path d="M126 143 l4 6 l4 -6 Z" fill="#fff"/><path d="M72 66 Q66 32 112 28 Q158 24 178 44 Q156 58 150 62 Q112 52 72 66 Z" fill="#CE3320"/><path d="M110 30 Q150 26 176 44 Q150 50 120 46 Z" fill="#E24A38" opacity=".55"/><circle cx="180" cy="42" r="13" fill="#fff"/><circle cx="180" cy="42" r="13" fill="#F3F3F3"/><circle cx="178" cy="40" r="12" fill="#fff"/><path d="M64 66 Q116 50 160 64 Q163 76 150 78 Q112 66 74 78 Q62 76 64 66 Z" fill="#fff"/><path d="M64 66 Q116 52 160 64 Q140 60 116 60 Q90 60 64 66 Z" fill="#EDEDED" opacity=".7"/></svg>`;
+const TREVOR_SVG = `<svg width="118" height="131" viewBox="0 0 220 244" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Trevor the dinosaur wearing a Santa hat"><path d="M72 182 Q22 184 16 150 Q42 166 80 160 Z" fill="#4FAE2A"/><path d="M60 176 l-14 -4 l10 -9 Z" fill="#E8812E"/><path d="M44 170 l-14 -2 l9 -10 Z" fill="#E8812E"/><ellipse cx="90" cy="216" rx="24" ry="16" fill="#4FAE2A"/><ellipse cx="142" cy="216" rx="24" ry="16" fill="#58B82E"/><circle cx="76" cy="222" r="5" fill="#E8812E"/><circle cx="90" cy="225" r="5" fill="#E8812E"/><circle cx="104" cy="222" r="5" fill="#E8812E"/><circle cx="128" cy="222" r="5" fill="#E8812E"/><circle cx="142" cy="225" r="5" fill="#E8812E"/><circle cx="156" cy="222" r="5" fill="#E8812E"/><path d="M60 152 Q54 74 116 70 Q178 74 172 152 Q170 208 116 208 Q62 208 60 152 Z" fill="#63C232"/><ellipse cx="117" cy="154" rx="40" ry="52" fill="#D9F2A2"/><path d="M68 138 q-15 6 -13 23 q11 -9 18 -8 Z" fill="#58B82E"/><path d="M164 138 q15 6 13 23 q-11 -9 -18 -8 Z" fill="#4FAE2A"/><circle cx="99" cy="112" r="15" fill="#fff"/><circle cx="135" cy="112" r="15" fill="#fff"/><circle cx="102" cy="114" r="6.5" fill="#222"/><circle cx="132" cy="114" r="6.5" fill="#222"/><circle cx="104.3" cy="111" r="2.1" fill="#fff"/><circle cx="134.3" cy="111" r="2.1" fill="#fff"/><circle cx="84" cy="132" r="7" fill="#F6A96B" opacity=".55"/><circle cx="150" cy="132" r="7" fill="#F6A96B" opacity=".55"/><path d="M98 138 Q117 160 137 138 Q117 150 98 138 Z" fill="#7a3b23"/><path d="M98 138 Q117 153 137 138" fill="none" stroke="#2F7A1A" stroke-width="3" stroke-linecap="round"/><path d="M106 143 l4 6 l4 -6 Z" fill="#fff"/><path d="M126 143 l4 6 l4 -6 Z" fill="#fff"/><path d="M72 66 Q66 32 112 28 Q158 24 178 44 Q156 58 150 62 Q112 52 72 66 Z" fill="#CE3320"/><path d="M110 30 Q150 26 176 44 Q150 50 120 46 Z" fill="#E24A38" opacity=".55"/><circle cx="180" cy="42" r="13" fill="#fff"/><circle cx="180" cy="42" r="13" fill="#F3F3F3"/><circle cx="178" cy="40" r="12" fill="#fff"/><path d="M64 66 Q116 50 160 64 Q163 76 150 78 Q112 66 74 78 Q62 76 64 66 Z" fill="#fff"/><path d="M64 66 Q116 52 160 64 Q140 60 116 60 Q90 60 64 66 Z" fill="#EDEDED" opacity=".7"/></svg>`;
 
 /* ---- real Argos product pool (names, prices, photos, descriptions baked in) ---- */
 const POOL = [
@@ -557,7 +590,7 @@ const POOL = [
 const gbp = n => "£"+(Math.round(n*100)/100).toLocaleString("en-GB",{minimumFractionDigits:(n%1?2:0),maximumFractionDigits:2});
 const pts = (g,a) => Math.max(0, Math.round(100*(1-Math.abs(g-a)/a)));
 function cleanPrice(v){v=String(v).replace(/[^0-9.]/g,"");const i=v.indexOf(".");if(i>=0){v=v.slice(0,i+1)+v.slice(i+1).replace(/\./g,"");const d=v.split(".");if(d[1]!==undefined)v=d[0]+"."+d[1].slice(0,2);}return v;}
-const COLORS = ["#C8102E","#174A2B","#C9A646","#2B6CB0","#8F0A20","#B7791F","#2F855A","#6B46C1","#B83280","#2C7A7B"];
+const COLORS = ["#D2232A","#1E7A34","#FFC93C","#2B6CB0","#8E0F16","#B7791F","#2F855A","#6B46C1","#B83280","#2C7A7B"];
 const ROUND_MS = 25000;       // (legacy; no per-item timer now)
 const ROUNDS = 3;             // rounds per game
 const PER_ROUND = 6;          // items per round
@@ -577,13 +610,21 @@ try{
 const roomRef = code => DB.ref("rooms/"+code);
 
 /* ---- small UI bits ---- */
+const HOLLY_SVG = `<svg viewBox="0 0 80 44" xmlns="http://www.w3.org/2000/svg"><path d="M38 30C26 32 12 28 4 16c8 1 12-3 14-8 4 6 10 7 16 5-1 6 1 12 4 17z" fill="#2F8A2E"/><path d="M42 30c12 2 26-2 34-14-8 1-12-3-14-8-4 6-10 7-16 5 1 6-1 12-4 17z" fill="#3BA236"/><path d="M38 30C28 26 18 20 10 16M42 30c10-4 20-10 28-14" stroke="#1E6A1E" stroke-width="1.6" fill="none"/><circle cx="34" cy="30" r="6" fill="#D61F26"/><circle cx="46" cy="30" r="6" fill="#E3272E"/><circle cx="40" cy="22" r="6" fill="#C8161E"/><circle cx="38" cy="20" r="1.8" fill="#fff" opacity=".7"/><circle cx="32" cy="28" r="1.6" fill="#fff" opacity=".6"/><circle cx="44" cy="28" r="1.6" fill="#fff" opacity=".6"/></svg>`;
+function Logo({size=64,sub=true,cls=""}){
+  return (<div className={"clk-logo "+cls} style={{fontSize:size}}>
+    <div className="clk-holly" dangerouslySetInnerHTML={{__html:HOLLY_SVG}}/>
+    <div className="clk-ticket"><span className="clk-word">CLARKOS</span></div>
+    {sub && <div className="clk-ribbon" style={{fontSize:"0.3em"}}>A family Christmas game</div>}
+  </div>);
+}
 function Trevor({size=90,cls=""}){ return <div className={"floaty "+cls} style={{width:size,height:"auto"}} dangerouslySetInnerHTML={{__html:TREVOR_SVG}}/>; }
 function Btn({children,onClick,tone="gold",className="",disabled}){
-  const t={gold:"bg-[#C9A646] hover:bg-[#d8b85a] text-[#2a1e05] shadow-[0_3px_0_#9a7d2e]",
-    red:"bg-[#C8102E] hover:bg-[#d8233f] text-white shadow-[0_3px_0_#8F0A20]",
-    pine:"bg-[#174A2B] hover:bg-[#1c5c35] text-white shadow-[0_3px_0_#0d3019]",
-    ghost:"bg-white/10 hover:bg-white/20 text-white ring-1 ring-white/25"}[tone];
-  return <button onClick={onClick} disabled={disabled} className={"font-bold rounded-xl px-4 py-2.5 transition active:translate-y-[2px] active:shadow-none disabled:opacity-40 disabled:cursor-not-allowed "+t+" "+className}>{children}</button>;
+  const t={gold:"bg-[#FFC93C] hover:bg-[#FFD45E] text-[#5A2600] shadow-[0_4px_0_#C98A10,0_0_0_2px_#FFF3DC]",
+    red:"bg-[#D2232A] hover:bg-[#E0323A] text-white shadow-[0_4px_0_#8E0F16,0_0_0_2px_#F3C969]",
+    pine:"bg-[#2F9A3E] hover:bg-[#36AC47] text-white shadow-[0_4px_0_#1C6B27,0_0_0_2px_#F3C969]",
+    ghost:"bg-white/15 hover:bg-white/20 text-white ring-2 ring-white/35"}[tone];
+  return <button onClick={onClick} disabled={disabled} className={"font-display font-semibold rounded-full px-5 py-2.5 transition active:translate-y-[3px] active:shadow-none disabled:opacity-40 disabled:cursor-not-allowed "+t+" "+className}>{children}</button>;
 }
 function QR({text,size=150}){
   const ref=useRef(null);
@@ -605,14 +646,14 @@ function Photo({idx,reveal,cls="h-48"}){
   const it=POOL[idx]||{};
   return (
     <div className="relative inline-block">
-      <div className={"bg-white rounded-2xl p-3 shadow-xl ring-1 ring-black/5 "+cls+" aspect-square flex items-center justify-center"}>
+      <div className={"bg-white rounded-3xl p-3 shadow-[0_10px_24px_rgba(120,40,0,.18)] ring-2 ring-[#F3C969]/60 "+cls+" aspect-square flex items-center justify-center"}>
         {it.code? <ArgImg code={it.code} v={it.v} size={600} alt="" className="max-h-full max-w-full object-contain"/> : <div className="text-5xl">🏷️</div>}
       </div>
       <div className="absolute -bottom-3 -right-3 rotate-[-6deg]">
-        <div className="bg-[#FBF6EC] rounded-md px-3 py-1.5 shadow-md ring-1 ring-black/10 flex items-center gap-1">
-          <span className="font-display font-bold text-[#1A1410] text-lg">£</span>
+        <div className="bg-[#FFF5E4] rounded-md px-3 py-1.5 shadow-md ring-1 ring-black/10 flex items-center gap-1">
+          <span className="font-display font-bold text-[#3A1A10] text-lg">£</span>
           {reveal
-            ? <span className="font-display font-extrabold text-[#C8102E] text-xl pop tnum">{(Math.round(it.gbp*100)/100).toLocaleString("en-GB")}</span>
+            ? <span className="font-display font-extrabold text-[#D2232A] text-xl pop tnum">{(Math.round(it.gbp*100)/100).toLocaleString("en-GB")}</span>
             : <span className="relative inline-block"><span className="opacity-0 font-display font-extrabold text-xl">888</span><span className="absolute inset-0 -mx-1 rounded-sm bg-[#15110c]" style={{clipPath:"polygon(0 12%,100% 0,100% 88%,0 100%)"}}/></span>}
         </div>
       </div>
@@ -626,11 +667,11 @@ function Leaderboard({room,compact}){
   return (
     <div className="space-y-2">
       {ps.map((p,i)=>{ const lead=i===0&&p._t>0;
-        return (<div key={p.id} className={"flex items-center gap-3 rounded-xl px-3 "+(compact?"py-1.5":"py-2.5")+" "+(lead?"bg-[#C9A646]/20 ring-1 ring-[#C9A646]":"bg-white/8")}>
-          <div className={"font-display font-bold tnum "+(compact?"text-base w-5":"text-xl w-6")+" "+(lead?"text-[#C9A646]":"text-white/50")}>{i+1}</div>
+        return (<div key={p.id} className={"flex items-center gap-3 rounded-xl px-3 "+(compact?"py-1.5":"py-2.5")+" "+(lead?"bg-[#FFC93C]/20 ring-1 ring-[#FFC93C]":"bg-white/8")}>
+          <div className={"font-display font-bold tnum "+(compact?"text-base w-5":"text-xl w-6")+" "+(lead?"text-[#FFC93C]":"text-white/50")}>{i+1}</div>
           <div className="w-7 h-7 rounded-full grid place-items-center text-white text-xs font-bold shrink-0" style={{background:p.color||"#888"}}>{(p.name||"?")[0].toUpperCase()}</div>
           <div className="flex-1 font-semibold text-white truncate">{p.name}{p.id===myId&&<span className="text-white/50 font-normal"> · you</span>}</div>
-          <div className={"font-display font-extrabold tnum "+(compact?"text-base":"text-xl")+" "+(lead?"text-[#C9A646]":"text-white")}>{p._t}</div>
+          <div className={"font-display font-extrabold tnum "+(compact?"text-base":"text-xl")+" "+(lead?"text-[#FFC93C]":"text-white")}>{p._t}</div>
         </div>);
       })}
     </div>
@@ -642,14 +683,14 @@ function Timer({deadline,size=110}){
   const left=Math.max(0,Math.ceil(((deadline||now)-now)/1000)), frac=Math.max(0,Math.min(1,((deadline||now)-now)/ROUND_MS));
   const r=size/2-8,c=2*Math.PI*r,danger=left<=5;
   return (<div className="relative grid place-items-center" style={{width:size,height:size}}>
-    <svg width={size} height={size} className="-rotate-90"><circle cx={size/2} cy={size/2} r={r} stroke="rgba(255,255,255,.15)" strokeWidth="8" fill="none"/><circle cx={size/2} cy={size/2} r={r} stroke={danger?"#C8102E":"#C9A646"} strokeWidth="8" fill="none" strokeDasharray={c} strokeDashoffset={c*(1-frac)} strokeLinecap="round" style={{transition:"stroke-dashoffset .3s linear"}}/></svg>
+    <svg width={size} height={size} className="-rotate-90"><circle cx={size/2} cy={size/2} r={r} stroke="rgba(255,255,255,.15)" strokeWidth="8" fill="none"/><circle cx={size/2} cy={size/2} r={r} stroke={danger?"#D2232A":"#FFC93C"} strokeWidth="8" fill="none" strokeDasharray={c} strokeDashoffset={c*(1-frac)} strokeLinecap="round" style={{transition:"stroke-dashoffset .3s linear"}}/></svg>
     <div className={"absolute font-display font-extrabold tnum "+(danger?"text-[#ff6b6b]":"text-white")} style={{fontSize:size*0.34}}>{left}</div>
   </div>);
 }
 function ScratchCard({prize}){
   const cv=useRef(null); const [done,setDone]=useState(false);
   useEffect(()=>{const c=cv.current;if(!c)return;const ctx=c.getContext("2d");
-    const g=ctx.createLinearGradient(0,0,c.width,c.height);g.addColorStop(0,"#C9A646");g.addColorStop(1,"#E7C96B");ctx.fillStyle=g;ctx.fillRect(0,0,c.width,c.height);
+    const g=ctx.createLinearGradient(0,0,c.width,c.height);g.addColorStop(0,"#FFC93C");g.addColorStop(1,"#FFD873");ctx.fillStyle=g;ctx.fillRect(0,0,c.width,c.height);
     ctx.fillStyle="rgba(90,60,0,.55)";ctx.font="bold 15px Hanken Grotesk";ctx.textAlign="center";ctx.fillText("✦ SCRATCH TO REVEAL ✦",c.width/2,c.height/2+5);
     let drawing=false,fin=false;
     const P=e=>{const r=c.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return{x:(t.clientX-r.left)*(c.width/r.width),y:(t.clientY-r.top)*(c.height/r.height)};};
@@ -661,7 +702,7 @@ function ScratchCard({prize}){
     return ()=>{window.removeEventListener("mouseup",up);window.removeEventListener("touchend",up);};
   },[]);
   return (<div className="relative rounded-xl overflow-hidden ring-1 ring-black/10 select-none" style={{width:"100%",maxWidth:300,height:120}}>
-    <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-[#174A2B] to-[#0e3019] text-center px-4"><div><div className="text-[#E7C96B] text-xs font-bold uppercase tracking-wider">Bonus</div><div className="text-white font-display font-extrabold text-xl leading-tight">{prize}</div></div></div>
+    <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-[#1E7A34] to-[#11501F] text-center px-4"><div><div className="text-[#FFD873] text-xs font-bold uppercase tracking-wider">Bonus</div><div className="text-white font-display font-extrabold text-xl leading-tight">{prize}</div></div></div>
     <canvas ref={cv} width={300} height={120} className={"absolute inset-0 w-full h-full cursor-pointer transition-opacity duration-500 "+(done?"opacity-0 pointer-events-none":"opacity-100")}/>
   </div>);
 }
@@ -707,17 +748,16 @@ function Landing({onStart,onJoin,onSchedule,onPractice,prefillCode}){
     "After each round: a round winner and everyone's guesses. Highest total after 3 rounds wins."
   ];
   const header=(<React.Fragment>
-    <Trevor size={110} cls="mb-2"/>
-    <div className="font-hand text-[#E7C96B] text-xl">Christmas Day</div>
-    <div className="font-display font-extrabold text-4xl mb-2 text-center">The Argos Game</div>
+    <Logo size={52} cls="mt-4 mb-1"/>
+    <Trevor size={104} cls="-mt-1 mb-1"/>
   </React.Fragment>);
-  const shell=children=>(<div className="min-h-screen bg-gradient-to-b from-[#CE3320] to-[#AE2817] text-white flex flex-col items-center px-6 py-8">{header}{children}</div>);
+  const shell=children=>(<div className="min-h-screen clarkos-bg text-white flex flex-col items-center px-6 py-8">{header}{children}</div>);
   const nameField=(<div className="w-full"><label className="block text-sm font-bold text-white mb-1">Your name</label>
-    <input value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Jenna" maxLength={14} className="w-full rounded-xl px-4 py-3 bg-white text-[#1A1410] font-semibold outline-none ring-2 ring-transparent focus:ring-white"/></div>);
+    <input value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Jenna" maxLength={14} className="w-full rounded-xl px-4 py-3 bg-white text-[#3A1A10] font-semibold outline-none ring-2 ring-transparent focus:ring-white"/></div>);
   const back=(<button onClick={()=>setMode(null)} className="self-start text-white/60 text-sm mb-2">← back</button>);
 
   if(mode===null) return shell(<React.Fragment>
-    <div className="text-white/80 mb-6 text-center max-w-sm">Guess the Argos price. Everyone plays on their own phone.</div>
+    <div className="text-white/80 mb-6 text-center max-w-sm">Guess the real Argos price. Everyone plays on their own phone.</div>
     <div className="w-full max-w-sm space-y-3">
       <Btn tone="pine" className="w-full py-4 text-lg" onClick={()=>setMode("start")}>▶  Start a game now</Btn>
       <Btn tone="gold" className="w-full py-4 text-lg" onClick={()=>setMode("join")}>👥  Join a game</Btn>
@@ -725,15 +765,15 @@ function Landing({onStart,onJoin,onSchedule,onPractice,prefillCode}){
     </div>
     <button onClick={()=>setMode("practice")} className="text-white/55 text-sm underline underline-offset-2 mt-3">🤖 Just trying it out? Practice vs the computer</button>
     <div className="w-full max-w-sm mt-6 bg-white/5 rounded-2xl p-5 ring-1 ring-white/10">
-      <div className="font-display font-extrabold text-lg text-[#E7C96B] mb-3">How to play</div>
+      <div className="font-display font-bold text-xl text-[#FFD873] mb-3">How to play</div>
       <div className="space-y-2.5">{rules.map((s,i)=>(<div key={i} className="flex items-start gap-3">
-        <div className="w-6 h-6 rounded-full bg-[#C9A646] text-[#2a1e05] font-bold text-sm grid place-items-center shrink-0 mt-0.5">{i+1}</div>
+        <div className="w-6 h-6 rounded-full bg-[#FFC93C] text-[#5A2600] font-bold text-sm grid place-items-center shrink-0 mt-0.5">{i+1}</div>
         <div className="text-sm text-white/85 leading-snug">{s}</div></div>))}</div>
     </div>
     <button onClick={()=>{location.href=location.pathname+"?tv=1";}} className="text-white/45 text-xs underline mt-5">📺 Setting up a TV? Open scoreboard mode</button>
   </React.Fragment>);
 
-  if(mode==="start") return shell(<div className="w-full max-w-sm bg-white/10 rounded-2xl p-5 ring-1 ring-white/15 mt-2">
+  if(mode==="start") return shell(<div className="w-full max-w-sm clk-panel rounded-2xl p-5 mt-2">
     {back}
     <div className="font-display font-extrabold text-xl mb-3">Start a game now</div>
     {nameField}
@@ -741,7 +781,7 @@ function Landing({onStart,onJoin,onSchedule,onPractice,prefillCode}){
     <div className="text-white/50 text-xs mt-2 text-center">You'll host and play. Share the link on the next screen.</div>
   </div>);
 
-  if(mode==="practice") return shell(<div className="w-full max-w-sm bg-white/10 rounded-2xl p-5 ring-1 ring-white/15 mt-2">
+  if(mode==="practice") return shell(<div className="w-full max-w-sm clk-panel rounded-2xl p-5 mt-2">
     {back}
     <div className="font-display font-extrabold text-xl mb-3">Practice vs the computer</div>
     {nameField}
@@ -749,31 +789,31 @@ function Landing({onStart,onJoin,onSchedule,onPractice,prefillCode}){
     <Btn tone="gold" className="w-full py-3.5 text-lg mt-4" disabled={nameLen<1} onClick={()=>onPractice(name)}>Start practice →</Btn>
   </div>);
 
-  if(mode==="join") return shell(<div className="w-full max-w-sm bg-white/10 rounded-2xl p-5 ring-1 ring-white/15 mt-2">
+  if(mode==="join") return shell(<div className="w-full max-w-sm clk-panel rounded-2xl p-5 mt-2">
     {!invited && back}
     <div className="font-display font-extrabold text-xl mb-3">Join a game</div>
     {nameField}
     <div className="mt-4">
       {invited
-        ? <div className="text-white/70 text-sm">Joining room <b className="text-[#C9A646] font-display tracking-widest">{code}</b></div>
-        : <React.Fragment><label className="block text-sm font-bold text-[#E7C96B] mb-1">Room code</label>
-           <input value={code} onChange={e=>setCode(e.target.value.replace(/\D/g,"").slice(0,4))} inputMode="numeric" placeholder="0000" className="w-full rounded-xl px-4 py-3 bg-[#FFF6DD] text-[#8a6d12] border-2 border-[#C9A646] font-display font-extrabold text-2xl tracking-[0.4em] text-center outline-none placeholder:text-[#d8c88a]"/></React.Fragment>}
+        ? <div className="text-white/70 text-sm">Joining room <b className="text-[#FFC93C] font-display tracking-widest">{code}</b></div>
+        : <React.Fragment><label className="block text-sm font-bold text-[#FFD873] mb-1">Room code</label>
+           <input value={code} onChange={e=>setCode(e.target.value.replace(/\D/g,"").slice(0,4))} inputMode="numeric" placeholder="0000" className="w-full rounded-xl px-4 py-3 bg-[#FFF5E4] text-[#B0300F] border-2 border-[#FFC93C] font-display font-extrabold text-2xl tracking-[0.4em] text-center outline-none placeholder:text-[#E8B9A0]"/></React.Fragment>}
     </div>
     <Btn tone="gold" className="w-full py-3.5 text-lg mt-3" disabled={nameLen<1||code.length!==4} onClick={()=>onJoin(code,name)}>Join game →</Btn>
-    {invited && <div className="mt-4 pt-4 border-t border-white/10"><div className="text-xs uppercase tracking-widest font-bold text-white/50 mb-2">How to play</div><div className="space-y-1.5">{rules.map((s,i)=>(<div key={i} className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-[#C9A646] text-[#2a1e05] font-bold text-[11px] grid place-items-center shrink-0 mt-0.5">{i+1}</div><div className="text-xs text-white/80 leading-snug">{s}</div></div>))}</div></div>}
+    {invited && <div className="mt-4 pt-4 border-t border-white/10"><div className="text-xs uppercase tracking-widest font-bold text-white/50 mb-2">How to play</div><div className="space-y-1.5">{rules.map((s,i)=>(<div key={i} className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-[#FFC93C] text-[#5A2600] font-bold text-[11px] grid place-items-center shrink-0 mt-0.5">{i+1}</div><div className="text-xs text-white/80 leading-snug">{s}</div></div>))}</div></div>}
   </div>);
 
-  if(mode==="schedule") return shell(<div className="w-full max-w-sm bg-white/10 rounded-2xl p-5 ring-1 ring-white/15 mt-2">
+  if(mode==="schedule") return shell(<div className="w-full max-w-sm clk-panel rounded-2xl p-5 mt-2">
     {back}
     <div className="font-display font-extrabold text-xl mb-3">Schedule a game</div>
     {nameField}
     <div className="mt-4">
-      <label className="block text-sm font-bold text-[#E7C96B] mb-1">Game name</label>
-      <input value={title} onChange={e=>setTitle(e.target.value)} placeholder="e.g. Cozy Gang Christmas" maxLength={30} className="w-full rounded-xl px-4 py-3 bg-white text-[#1A1410] font-semibold outline-none"/>
+      <label className="block text-sm font-bold text-[#FFD873] mb-1">Game name</label>
+      <input value={title} onChange={e=>setTitle(e.target.value)} placeholder="e.g. Cozy Gang Christmas" maxLength={30} className="w-full rounded-xl px-4 py-3 bg-white text-[#3A1A10] font-semibold outline-none"/>
     </div>
     <div className="mt-4">
-      <label className="block text-sm font-bold text-[#E7C96B] mb-1">Game starts at</label>
-      <input type="datetime-local" value={when} onChange={e=>setWhen(e.target.value)} className="w-full rounded-xl px-3 py-3 bg-white text-[#1A1410] font-semibold outline-none"/>
+      <label className="block text-sm font-bold text-[#FFD873] mb-1">Game starts at</label>
+      <input type="datetime-local" value={when} onChange={e=>setWhen(e.target.value)} className="w-full rounded-xl px-3 py-3 bg-white text-[#3A1A10] font-semibold outline-none"/>
       <div className="text-white/50 text-[11px] mt-1">Everyone sees this in their own timezone, with a countdown on the link.</div>
     </div>
     <Btn tone="gold" className="w-full py-3.5 text-lg mt-3" disabled={nameLen<1||!when} onClick={()=>onSchedule(name,when,title)}>Schedule game →</Btn>
@@ -807,13 +847,13 @@ function RulesOverlay({onClose}){
     ["Closest scores","Closest guess scores 1 point. Spot-on scores 2. Ties all score."],
     ["Round by round","After each round: a round winner and everyone's guesses. Highest total after 3 rounds wins."]
   ];
-  return (<div className="min-h-screen bg-gradient-to-b from-[#CE3320] to-[#AE2817] text-white flex flex-col items-center px-6 py-8 overflow-auto no-scrollbar">
-    <Trevor size={96} cls="mb-2"/>
-    <div className="font-hand text-[#E7C96B] text-lg">How to play</div>
-    <div className="font-display font-extrabold text-3xl mb-5 text-center">The Argos Game</div>
+  return (<div className="min-h-screen clarkos-bg text-white flex flex-col items-center px-6 py-8 overflow-auto no-scrollbar">
+    <Logo size={50} cls="mt-4" sub={false}/>
+    <Trevor size={88} cls="mt-1"/>
+    <div className="font-hand text-[#FFD873] text-2xl mb-4">How to play</div>
     <div className="w-full max-w-sm space-y-3">
-      {steps.map((s,i)=>(<div key={i} className="flex items-start gap-3 bg-white/10 rounded-2xl p-4 ring-1 ring-white/10">
-        <div className="w-7 h-7 rounded-full bg-[#C9A646] text-[#2a1e05] font-bold grid place-items-center shrink-0">{i+1}</div>
+      {steps.map((s,i)=>(<div key={i} className="flex items-start gap-3 clk-panel rounded-2xl p-4">
+        <div className="w-7 h-7 rounded-full bg-[#FFC93C] text-[#5A2600] font-bold grid place-items-center shrink-0">{i+1}</div>
         <div><div className="font-display font-bold text-lg leading-tight">{s[0]}</div><div className="text-white/80 text-sm leading-snug mt-0.5">{s[1]}</div></div>
       </div>))}
     </div>
@@ -827,13 +867,13 @@ function YourRound({room,rd}){
   const me=room.players&&room.players[myId]; if(!me) return null;
   const base=rd*PER_ROUND; const rows=[];
   for(let i=0;i<PER_ROUND;i++){ const pos=base+i; if(pos>=room.order.length)break; const it=POOL[room.order[pos]]||{}; const sc=scorePos(room,pos); const r=sc.res[myId]||{}; rows.push({it,pos,price:sc.price,g:r.guess,pts:r.pts}); }
-  return (<div className="bg-white/10 rounded-2xl p-3 ring-1 ring-white/10">
+  return (<div className="clk-panel rounded-2xl p-3">
     <div className="text-[11px] uppercase tracking-widest font-bold text-white/60 mb-2">Your round — what you guessed vs the real price</div>
     <div className="space-y-1.5">{rows.map(r=>(
       <div key={r.pos} className="flex items-center gap-2 text-sm">
         <div className="w-9 h-9 bg-white rounded p-0.5 shrink-0 flex items-center justify-center">{r.it.code?<ArgImg code={r.it.code} v={r.it.v} size={120} className="max-w-full max-h-full object-contain"/>:<span className="text-sm">🏷️</span>}</div>
         <div className="flex-1 min-w-0 truncate text-white/85">{r.it.name}</div>
-        <div className="text-right shrink-0 tnum"><span className="text-white/50">you </span><b className="text-white">{r.g!=null?gbp(r.g):"—"}</b><span className="text-white/30"> · </span><b className="text-[#C9A646]">{gbp(r.price)}</b></div>
+        <div className="text-right shrink-0 tnum"><span className="text-white/50">you </span><b className="text-white">{r.g!=null?gbp(r.g):"—"}</b><span className="text-white/30"> · </span><b className="text-[#FFC93C]">{gbp(r.price)}</b></div>
         <div className={"w-7 text-right font-bold shrink-0 "+(r.pts?"text-[#9BE5A0]":"text-white/25")}>{r.pts?"+"+r.pts:"·"}</div>
       </div>))}
     </div>
@@ -856,33 +896,33 @@ function RoundRoast({room,rd,isHost,onSheet,onNext,last,onLeave}){
   const NOWORST=["Trevor is quietly impressed.","No disasters this round. Trevor is almost disappointed.","A tidy round — Trevor had nothing to work with."];
   const quip = r.worst ? LINES[(rd*7 + (r.worst.name?r.worst.name.length:0))%LINES.length](r.worst) : NOWORST[rd%NOWORST.length];
   const Big=({rec,emoji,label,good})=> rec? (
-    <div className={"rounded-2xl p-3 ring-1 "+(good?"bg-[#174A2B]/45 ring-[#9BE5A0]/40":"bg-black/25 ring-white/15")}>
+    <div className={"rounded-2xl p-3 ring-1 "+(good?"bg-[#1E7A34]/85 ring-2 ring-[#9BE5A0]/60":"bg-black/25 ring-white/15")}>
       <div className="flex items-center gap-3">
         <div className="w-24 h-24 bg-white rounded-xl p-1.5 shrink-0 flex items-center justify-center">{rec.code?<ArgImg code={rec.code} v={rec.v} size={300} className="max-w-full max-h-full object-contain"/>:<span className="text-3xl">🏷️</span>}</div>
         <div className="flex-1 min-w-0">
-          <div className={"text-[11px] uppercase tracking-widest font-bold "+(good?"text-[#9BE5A0]":"text-[#E7C96B]")}>{emoji} {label}</div>
+          <div className={"text-[11px] uppercase tracking-widest font-bold "+(good?"text-[#9BE5A0]":"text-[#FFD873]")}>{emoji} {label}</div>
           <div className="font-display font-extrabold text-2xl text-white leading-tight">{rec.name}</div>
           <div className="text-white/75 text-sm leading-tight truncate">{rec.item}</div>
-          <div className="text-sm mt-1"><span className="text-white/60">guessed</span> <b className="text-white">{gbp(rec.g)}</b> · <span className="text-white/60">it was</span> <b className="text-[#C9A646]">{gbp(rec.price)}</b></div>
+          <div className="text-sm mt-1"><span className="text-white/60">guessed</span> <b className="text-white">{gbp(rec.g)}</b> · <span className="text-white/60">it was</span> <b className="text-[#FFC93C]">{gbp(rec.price)}</b></div>
         </div>
       </div>
     </div>
   ):null;
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#CE3320] to-[#AE2817] text-white flex flex-col px-5 py-6 overflow-auto no-scrollbar">
+    <div className="min-h-screen clarkos-bg text-white flex flex-col px-5 py-6 overflow-auto no-scrollbar">
       <div className="text-center mb-4">
         <Trevor size={92} cls="mx-auto mb-1"/>
-        <div className="font-hand text-[#E7C96B] text-xl">Trevor's verdict</div>
-        <div className="font-display font-extrabold text-3xl">Round {rd+1} — the damage</div>
+        <div className="font-hand text-[#FFD873] text-xl">Trevor's verdict</div>
+        <div className="font-display font-bold text-3xl drop-shadow-[0_3px_0_rgba(90,0,6,.45)]">Round {rd+1} — the damage</div>
       </div>
       <div className="space-y-3 max-w-md mx-auto w-full">
         <Big rec={r.best} emoji="🎯" label="Guess of the round" good/>
         <Big rec={r.worst} emoji="🌋" label="Wildest miss"/>
         <div className="grid grid-cols-2 gap-3">
-          {r.bigSpender&&<div className="bg-white/10 rounded-2xl p-3 ring-1 ring-white/10"><div className="text-xl">🤑</div><div className="text-[11px] uppercase tracking-wide font-bold text-white/60">Biggest spender</div><div className="font-display font-extrabold text-lg text-[#C9A646] leading-tight">{r.bigSpender.name}</div><div className="text-[11px] text-white/60">{gbp(r.bigSpender.total)} of guesses</div></div>}
-          {r.roundWinner&&<div className="bg-white/10 rounded-2xl p-3 ring-1 ring-white/10"><div className="text-xl">👑</div><div className="text-[11px] uppercase tracking-wide font-bold text-white/60">Round winner</div><div className="font-display font-extrabold text-lg text-[#9BE5A0] leading-tight">{r.roundWinner.name}</div><div className="text-[11px] text-white/60">+{r.roundWinner.rpts} points</div></div>}
+          {r.bigSpender&&<div className="clk-panel rounded-2xl p-3"><div className="text-xl">🤑</div><div className="text-[11px] uppercase tracking-wide font-bold text-white/60">Biggest spender</div><div className="font-display font-extrabold text-lg text-[#FFC93C] leading-tight">{r.bigSpender.name}</div><div className="text-[11px] text-white/60">{gbp(r.bigSpender.total)} of guesses</div></div>}
+          {r.roundWinner&&<div className="clk-panel rounded-2xl p-3 text-center"><div className="text-2xl">👑</div><div className="text-[11px] uppercase tracking-wide font-bold text-white/60">Round winner</div><div className="font-display font-extrabold text-lg text-[#9BE5A0] leading-tight">{r.roundWinner.name}</div><div className="text-[11px] text-white/60">+{r.roundWinner.rpts} points</div></div>}
         </div>
-        <div className="bg-black/20 rounded-2xl p-3 text-center font-hand text-lg text-[#E7C96B]">"{quip}"</div>
+        <div className="clk-quote rounded-2xl px-4 py-3 text-center font-hand text-lg text-[#FFD873]">"{quip}"</div>
         <YourRound room={room} rd={rd}/>
       </div>
       <div className="mt-6 max-w-md mx-auto w-full flex flex-col gap-2">
@@ -904,33 +944,33 @@ function GuessDeck({code,room}){
   const allIn=filled===positions.length;
   const submit=()=>{ const up={submittedRound:room.round}; positions.forEach((p,i)=>{ up["guesses/"+p]=parseFloat(vals[i])||0; }); roomRef(code).child("players/"+myId).update(up); };
   return (
-    <div className="h-[100dvh] bg-[#FBF6EC] text-[#1A1410] flex flex-col overflow-hidden">
-      <div className="bg-[#C8102E] text-white px-5 py-3 flex items-center justify-between shrink-0">
+    <div className="h-[100dvh] bg-[#FFF5E4] text-[#3A1A10] flex flex-col overflow-hidden" style={{backgroundImage:"radial-gradient(ellipse 80% 40% at 50% 0%,#FFFFFF,transparent 70%)"}}>
+      <div className="bg-[#C8161E] text-white px-5 py-3 flex items-center justify-between shrink-0 font-display rounded-b-2xl shadow-[0_3px_0_#8E0F16]">
         <div className="font-bold">Round {room.round+1} of {ROUNDS}{room.practice?" · Practice":""}</div>
         <div className="text-sm font-semibold tnum">Item {cur+1} / {positions.length}</div>
       </div>
-      <div className="flex justify-center gap-2 py-2 bg-[#F3EAD6] shrink-0">
-        {positions.map((p,i)=><button key={i} onClick={()=>setCur(i)} className={"w-3 h-3 rounded-full transition "+(i===cur?"bg-[#C8102E] scale-125":parseFloat(vals[i])>0?"bg-[#174A2B]":"bg-[#d9c9a6]")}/>)}
+      <div className="flex justify-center gap-2 py-2.5 shrink-0">
+        {positions.map((p,i)=><button key={i} onClick={()=>setCur(i)} className={"w-3 h-3 rounded-full transition "+(i===cur?"bg-[#D2232A] scale-125":parseFloat(vals[i])>0?"bg-[#1E7A34]":"bg-[#EBCF9E]")}/>)}
       </div>
       <div className="flex-1 min-h-0 overflow-auto no-scrollbar flex items-center justify-center px-5 py-4">
         <div className="w-full max-w-3xl flex flex-col sm:flex-row sm:items-center sm:justify-center gap-4 sm:gap-10">
           <div className="flex flex-col items-center shrink-0">
             <Photo idx={room.order[pos]} reveal={false} cls="h-56 sm:h-64"/>
             <div className="font-display font-bold text-lg text-center mt-3 max-w-xs leading-tight">{item.name}</div>
-            {item.desc && <div className="text-[#8a7a5f] text-xs text-center mt-0.5 max-w-xs leading-snug">{item.desc}</div>}
+            {item.desc && <div className="text-[#9A6B4B] text-xs text-center mt-0.5 max-w-xs leading-snug">{item.desc}</div>}
           </div>
           <div className="flex flex-col items-center w-full sm:w-72">
-            <label className="text-[#8a7a5f] text-xs font-bold">Your price guess</label>
-            <div className="font-display font-extrabold text-4xl text-[#C8102E] mb-2 tnum">£{vals[cur]||"0"}</div>
+            <label className="text-[#9A6B4B] text-sm font-bold">Your price guess</label>
+            <div className="font-display font-bold text-5xl text-[#D2232A] mb-2 tnum">£{vals[cur]||"0"}</div>
             <Keypad val={vals[cur]} setVal={setVal}/>
             <div className="flex gap-3 items-stretch w-full max-w-[320px] mt-4">
-              <button onClick={()=>setCur(c=>Math.max(0,c-1))} disabled={cur===0} className="rounded-xl px-5 bg-black/5 text-[#1A1410] font-bold text-xl disabled:opacity-30">←</button>
+              <button onClick={()=>setCur(c=>Math.max(0,c-1))} disabled={cur===0} className="rounded-full px-5 bg-[#FBE7C6] text-[#3A1A10] font-bold text-xl disabled:opacity-30">←</button>
               {cur<positions.length-1
                 ? <Btn tone="red" className="flex-1 py-3.5 text-lg" disabled={!(parseFloat(vals[cur])>0)} onClick={()=>setCur(c=>c+1)}>Next item →</Btn>
                 : <Btn tone="pine" className="flex-1 py-3.5 text-lg" disabled={!allIn} onClick={submit}>🔒 Submit all {positions.length}</Btn>}
             </div>
-            {cur===positions.length-1 && !allIn && <div className="text-center text-[#8a7a5f] text-[11px] mt-2">Put a price on every item — {filled}/{positions.length} done.</div>}
-            <div className="text-[#8a7a5f] text-[11px] mt-2">Tap <b>.</b> for pennies</div>
+            {cur===positions.length-1 && !allIn && <div className="text-center text-[#9A6B4B] text-[11px] mt-2">Put a price on every item — {filled}/{positions.length} done.</div>}
+            <div className="text-[#9A6B4B] text-[11px] mt-2">Tap <b>.</b> for pennies</div>
           </div>
         </div>
       </div>
@@ -945,20 +985,20 @@ function Countdown({to,big}){
   const d=Math.floor(s/86400); s-=d*86400; const h=Math.floor(s/3600); s-=h*3600; const m=Math.floor(s/60); const sec=s-m*60;
   const pad=n=>String(n).padStart(2,"0");
   const label = d>0 ? (d+"d "+h+"h "+pad(m)+"m") : (h>0 ? (h+":"+pad(m)+":"+pad(sec)) : (m+":"+pad(sec)));
-  return <span className={"font-display font-extrabold tnum text-[#E7C96B] "+(big?"text-6xl":"text-4xl")}>{label}</span>;
+  return <span className={"font-display font-extrabold tnum text-[#FFD873] "+(big?"text-6xl":"text-4xl")}>{label}</span>;
 }
 function icsHref(startAt,code,title){
   const dt=d=>new Date(d).toISOString().replace(/[-:]/g,"").replace(/\.\d{3}/,"");
   const url=location.origin+location.pathname+"?code="+code;
-  const sum=(title?title+" — ":"")+"The Argos Game 🎄";
-  const body=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Argos Game//EN","CALSCALE:GREGORIAN","BEGIN:VEVENT","UID:argos-"+code+"@jca-studio","DTSTAMP:"+dt(Date.now()),"DTSTART:"+dt(startAt),"DTEND:"+dt(startAt+1800000),"SUMMARY:"+sum,"DESCRIPTION:Join the Argos Game (room "+code+"): "+url,"URL:"+url,"END:VEVENT","END:VCALENDAR"].join("\r\n");
+  const sum=(title?title+" — ":"")+"Clarkos 🎄";
+  const body=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Clarkos//EN","CALSCALE:GREGORIAN","BEGIN:VEVENT","UID:clarkos-"+code+"@jca-studio","DTSTAMP:"+dt(Date.now()),"DTSTART:"+dt(startAt),"DTEND:"+dt(startAt+1800000),"SUMMARY:"+sum,"DESCRIPTION:Join Clarkos (room "+code+"): "+url,"URL:"+url,"END:VEVENT","END:VCALENDAR"].join("\r\n");
   return "data:text/calendar;charset=utf-8,"+encodeURIComponent(body);
 }
 function gcalHref(startAt,code,title){
   const dt=d=>new Date(d).toISOString().replace(/[-:]/g,"").replace(/\.\d{3}/,"");
   const url=location.origin+location.pathname+"?code="+code;
-  const text=(title?title+" — ":"")+"The Argos Game";
-  const details="Join the Argos Game (room "+code+"): "+url;
+  const text=(title?title+" — ":"")+"Clarkos";
+  const details="Join Clarkos (room "+code+"): "+url;
   return "https://calendar.google.com/calendar/render?action=TEMPLATE&text="+encodeURIComponent(text)+"&dates="+dt(startAt)+"/"+dt(startAt+1800000)+"&details="+encodeURIComponent(details);
 }
 function GameScreen({code,room,isHost,onLeave}){
@@ -975,27 +1015,28 @@ function GameScreen({code,room,isHost,onLeave}){
   const tvUrl=joinUrl+"&tv=1";
 
   if(room.phase==="lobby"){
-    const share=async()=>{ try{ if(navigator.share){ await navigator.share({title:"The Argos Game",text:"Join my Argos Game — code "+code,url:joinUrl}); } else { await navigator.clipboard.writeText(joinUrl); alert("Invite link copied — paste it into your group chat."); } }catch(e){} };
-    const shareTV=async()=>{ try{ if(navigator.share){ await navigator.share({title:"Argos Game scoreboard",text:"Open the Argos Game scoreboard on the TV",url:tvUrl}); } else { await navigator.clipboard.writeText(tvUrl); alert("TV scoreboard link copied — open it in a browser on your TV."); } }catch(e){} };
+    const share=async()=>{ try{ if(navigator.share){ await navigator.share({title:"Clarkos",text:"Join my Clarkos game — code "+code,url:joinUrl}); } else { await navigator.clipboard.writeText(joinUrl); alert("Invite link copied — paste it into your group chat."); } }catch(e){} };
+    const shareTV=async()=>{ try{ if(navigator.share){ await navigator.share({title:"Clarkos scoreboard",text:"Open the Clarkos scoreboard on the TV",url:tvUrl}); } else { await navigator.clipboard.writeText(tvUrl); alert("TV scoreboard link copied — open it in a browser on your TV."); } }catch(e){} };
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[#CE3320] to-[#AE2817] text-white flex flex-col items-center px-6 py-8 overflow-auto no-scrollbar">
-        <div className="font-hand text-[#E7C96B] text-lg">{room.title?"The Argos Game":"Christmas Day"}</div>
-        <div className="font-display font-extrabold text-3xl mb-4 text-center">{room.title||"The Argos Game"}</div>
+      <div className="min-h-screen clarkos-bg text-white flex flex-col items-center px-6 py-8 overflow-auto no-scrollbar">
+        <Trevor size={70} cls="mb-1"/>
+        <div className="font-hand text-[#FFD873] text-xl -rotate-3">{room.title?"Clarkos":"Christmas Day"}</div>
+        <div className="font-display font-bold text-4xl mb-4 text-center tracking-wide drop-shadow-[0_3px_0_rgba(90,0,6,.45)]">{room.title||"CLARKOS"}</div>
         <div className="text-white/70 text-xs uppercase tracking-widest font-bold mb-1">Room code</div>
-        <div className="font-display font-extrabold text-6xl tracking-[0.2em] text-[#C9A646] tnum mb-4">{code}</div>
+        <div className="font-display font-extrabold text-6xl tracking-[0.2em] text-[#FFC93C] tnum mb-4">{code}</div>
         <QR text={joinUrl} size={190}/>
         <Btn tone="gold" className="mt-4 w-full max-w-xs py-3" onClick={share}>🔗 Share invite link</Btn>
         {!(room.startAt && Date.now()<room.startAt) && <Btn tone="ghost" className="mt-2 w-full max-w-xs py-3" onClick={()=>setShowTV(v=>!v)}>📺 Show scoreboard on a TV</Btn>}
         {showTV && !(room.startAt && Date.now()<room.startAt) && <div className="mt-2 w-full max-w-xs bg-black/25 rounded-xl p-3 ring-1 ring-white/15 text-center">
-          <div className="text-white/80 text-sm mb-2">On a TV's web browser, open <b>jca-studio.github.io/argos-game</b>, tap <b>scoreboard mode</b>, and enter code <b className="text-[#C9A646] tnum">{code}</b> with the remote. Or open this link on the TV directly:</div>
+          <div className="text-white/80 text-sm mb-2">On a TV's web browser, open <b>jca-studio.github.io/argos-game</b>, tap <b>scoreboard mode</b>, and enter code <b className="text-[#FFC93C] tnum">{code}</b> with the remote. Or open this link on the TV directly:</div>
           <div className="text-[11px] text-white/70 break-all bg-black/25 rounded-lg px-2 py-1.5 mb-2 select-all">{tvUrl}</div>
           <Btn tone="gold" className="w-full py-2.5" onClick={async()=>{ try{ await navigator.clipboard.writeText(tvUrl); setTvCopied(true); setTimeout(()=>setTvCopied(false),1800); }catch(e){ setTvCopied(false); } }}>{tvCopied?"Copied ✓":"Copy TV link"}</Btn>
         </div>}
         {room.startAt && Date.now()<room.startAt && <div className="mt-2 w-full max-w-xs">
           <div className="text-white/55 text-xs text-center font-bold mb-1">🗓️ Add to calendar</div>
           <div className="flex gap-2">
-            <a href={gcalHref(room.startAt,code,room.title)} target="_blank" rel="noopener" className="flex-1 py-2.5 rounded-xl font-bold text-center text-sm bg-white/10 hover:bg-white/20 text-white ring-1 ring-white/25">Google</a>
-            <a href={icsHref(room.startAt,code,room.title)} download={"argos-game-"+code+".ics"} className="flex-1 py-2.5 rounded-xl font-bold text-center text-sm bg-white/10 hover:bg-white/20 text-white ring-1 ring-white/25">Apple / Outlook</a>
+            <a href={gcalHref(room.startAt,code,room.title)} target="_blank" rel="noopener" className="flex-1 py-2.5 rounded-full font-bold text-center text-sm bg-white/15 hover:bg-white/20 text-white ring-2 ring-white/35">Google</a>
+            <a href={icsHref(room.startAt,code,room.title)} download={"clarkos-"+code+".ics"} className="flex-1 py-2.5 rounded-full font-bold text-center text-sm bg-white/15 hover:bg-white/20 text-white ring-2 ring-white/35">Apple / Outlook</a>
           </div>
         </div>}
         <div className="text-white/50 text-xs mt-1">or just tell people the code above</div>
@@ -1005,7 +1046,7 @@ function GameScreen({code,room,isHost,onLeave}){
         </div>
         <div className="w-full max-w-xs mt-8">
           {room.startAt && Date.now()<room.startAt
-            ? <div className="text-center bg-white/10 rounded-2xl py-5 px-3 ring-1 ring-[#C9A646]/30">
+            ? <div className="text-center clk-panel rounded-2xl py-5 px-3">
                 <div className="text-white/60 text-xs uppercase tracking-widest font-bold mb-1">Game starts in</div>
                 <Countdown to={room.startAt}/>
                 <div className="text-white/70 text-sm mt-1">{fmtWhen(room.startAt)} · your time</div>
@@ -1013,13 +1054,13 @@ function GameScreen({code,room,isHost,onLeave}){
               </div>
             : (isHost
                 ? <Btn tone="pine" className="w-full py-4 text-lg" disabled={players.length<1} onClick={()=>hostStart(code,room)}>Start game ▶</Btn>
-                : <div className="text-center bg-white/10 rounded-2xl py-4 px-4">
+                : <div className="text-center clk-panel rounded-2xl py-4 px-4">
                     <div className="font-display font-bold text-lg mb-1">You're in! 🎉</div>
                     <div className="text-white/75 text-sm">This is a group game — {(room.players&&room.host&&room.players[room.host]?room.players[room.host].name:"the host")} starts it when everyone's here. Keep this page open and it'll jump in automatically.</div>
                   </div>)}
         </div>
         <div className="text-white/45 text-xs mt-4 max-w-xs text-center">3 rounds · 6 items each · closest guess scores</div>
-        {isHost && typeof Notification!=="undefined" && Notification.permission!=="granted" && <button onClick={()=>{try{Notification.requestPermission();}catch(e){}}} className="text-[#E7C96B] text-xs underline mt-3">🔔 Alert me when players join</button>}
+        {isHost && typeof Notification!=="undefined" && Notification.permission!=="granted" && <button onClick={()=>{try{Notification.requestPermission();}catch(e){}}} className="text-[#FFD873] text-xs underline mt-3">🔔 Alert me when players join</button>}
         <button onClick={onLeave} className="text-white/40 text-xs underline mt-3">Leave this game</button>
       </div>
     );
@@ -1034,7 +1075,7 @@ function GameScreen({code,room,isHost,onLeave}){
       <div className="text-5xl mb-3">✅</div>
       <div className="font-display font-extrabold text-2xl">You're in!</div>
       <div className="text-white/70 mb-4">Round {room.round+1} locked.</div>
-      <div className="font-display font-extrabold text-5xl text-[#E7C96B] tnum">{nSub}<span className="text-white/40">/{players.length}</span></div>
+      <div className="font-display font-extrabold text-5xl text-[#FFD873] tnum">{nSub}<span className="text-white/40">/{players.length}</span></div>
       <div className="text-white/60 text-sm uppercase tracking-widest font-bold mt-1 mb-4">locked in</div>
       {waiting.length>0 ? (<div className="w-full max-w-xs">
         <div className="text-white/50 text-xs uppercase tracking-widest font-bold mb-2">Still guessing</div>
@@ -1049,9 +1090,9 @@ function GameScreen({code,room,isHost,onLeave}){
     const last=room.round+1>=ROUNDS;
     const myRp=me?roundPtsFor(room,myId,room.round):0;
     if(!showSheet) return <RoundRoast room={room} rd={room.round} isHost={isHost} onSheet={()=>setShowSheet(true)} onNext={()=>hostNext(code,room)} last={last} onLeave={onLeave}/>;
-    return (<div className="min-h-screen bg-gradient-to-b from-[#CE3320] to-[#AE2817] text-white flex flex-col items-center px-4 py-6 overflow-auto no-scrollbar">
+    return (<div className="min-h-screen clarkos-bg text-white flex flex-col items-center px-4 py-6 overflow-auto no-scrollbar">
       <button onClick={()=>setShowSheet(false)} className="self-start text-white/60 text-sm mb-1">← back to the roast</button>
-      <div className="font-display font-extrabold text-2xl text-[#C9A646] mb-1 text-center">Round {room.round+1} scoresheet</div>
+      <div className="font-display font-extrabold text-2xl text-[#FFC93C] mb-1 text-center">Round {room.round+1} scoresheet</div>
       {me && <div className="text-[#9BE5A0] font-bold mb-3">You scored +{myRp} this round</div>}
       <div className="w-full max-w-3xl"><ScoreSheet room={room} idxs={idxs} title/></div>
       <div className="w-full max-w-sm mt-6"><div className="text-xs uppercase tracking-widest font-bold text-white/60 mb-2">Standings</div><Leaderboard room={room} compact/></div>
@@ -1064,7 +1105,7 @@ function GameScreen({code,room,isHost,onLeave}){
 
   if(room.phase==="final"){
     const onAgain=()=>{ const players={}; Object.entries(room.players||{}).forEach(([id,p])=>players[id]={name:p.name,color:p.color,guesses:{},submittedRound:-1}); roomRef(code).update({phase:"lobby",round:0,order:shuffledOrder().slice(0,TOTAL_N),players}); };
-    return <div className="min-h-screen bg-gradient-to-b from-[#CE3320] to-[#AE2817] text-white flex flex-col"><Final room={room} isHost={isHost} onAgain={onAgain} onLeave={onLeave}/></div>;
+    return <div className="min-h-screen clarkos-bg text-white flex flex-col"><Final room={room} isHost={isHost} onAgain={onAgain} onLeave={onLeave}/></div>;
   }
   return <Splash msg="One moment…"/>;
 }
@@ -1073,36 +1114,36 @@ function ScoreSheet({room,idxs,title}){
   const players=playerList(room).map(p=>({...p,_t:totalFor(room,p.id)})).sort((a,b)=>b._t-a._t);
   if(!positions.length||!players.length) return <div className="text-white/60 text-sm text-center">Nothing to show yet.</div>;
   return (
-    <div className="bg-[#FBF6EC] text-[#1A1410] rounded-2xl p-3 sm:p-5 overflow-x-auto no-scrollbar shadow-xl ring-1 ring-black/10">
-      {title && <div className="text-center mb-4"><div className="font-display font-extrabold text-2xl sm:text-3xl text-[#1A1410]">Christmas Day Argos Game</div><div className="font-hand text-[#8a7a5f] text-lg">The real prices, and what everyone guessed</div></div>}
+    <div className="clk-card text-[#3A1A10] rounded-3xl p-3 sm:p-5 overflow-x-auto no-scrollbar">
+      {title && <div className="text-center mb-4"><div className="font-display font-extrabold text-2xl sm:text-3xl text-[#3A1A10]">Christmas Day Clarkos</div><div className="font-hand text-[#9A6B4B] text-lg">The real prices, and what everyone guessed</div></div>}
       <table className="text-sm" style={{borderCollapse:"collapse",width:"100%",minWidth:230+players.length*78}}>
-        <thead><tr className="border-b-2 border-[#E6D9BF]">
-          <th className="text-left p-2 text-[#8a7a5f] font-bold">Item</th>
-          <th className="p-2 text-[#C8102E] font-bold">Price</th>
-          {players.map(p=><th key={p.id} className={"p-2 font-bold whitespace-nowrap "+(p.id===myId?"bg-[#F3EAD6]":"")} style={{color:p.color}}>{p.name}{p.id===myId?" (you)":""}</th>)}
+        <thead><tr className="border-b-2 border-[#F0D9B0]">
+          <th className="text-left p-2 text-[#9A6B4B] font-bold">Item</th>
+          <th className="p-2 text-[#D2232A] font-bold">Price</th>
+          {players.map(p=><th key={p.id} className={"p-2 font-bold whitespace-nowrap "+(p.id===myId?"bg-[#FBE7C6]":"")} style={{color:p.color}}>{p.name}{p.id===myId?" (you)":""}</th>)}
         </tr></thead>
         <tbody>
           {(()=>{ const multiRound=new Set(positions.map(p=>Math.floor(p/PER_ROUND))).size>1; let prev=-1; return positions.map((pos,ri)=>{ const sc=scorePos(room,pos); const it=POOL[room.order[pos]]||{}; const rnd=Math.floor(pos/PER_ROUND); const itemNo=(pos%PER_ROUND)+1; const sep=multiRound&&rnd!==prev; prev=rnd;
             return (<React.Fragment key={pos}>
-              {sep&&<tr className="bg-[#efe4cb]"><td colSpan={2+players.length} className="px-2 py-1.5 font-display font-extrabold text-[#8a6d12] text-xs uppercase tracking-widest">Round {rnd+1}</td></tr>}
-              <tr className="border-b border-[#E6D9BF]">
+              {sep&&<tr className="bg-[#F7E2BC]"><td colSpan={2+players.length} className="px-2 py-1.5 font-display font-extrabold text-[#B0300F] text-xs uppercase tracking-widest">Round {rnd+1}</td></tr>}
+              <tr className="border-b border-[#F0D9B0]">
               <td className="p-2"><div className="flex items-center gap-2.5">
-                <div className="relative shrink-0"><div className="w-20 h-20 bg-white rounded-lg ring-1 ring-black/5 flex items-center justify-center p-1">{it.code?<ArgImg code={it.code} v={it.v} size={200} className="max-w-full max-h-full object-contain"/>:<span className="text-xl">🏷️</span>}</div><div className="absolute -top-2 -left-2 w-6 h-6 rounded-full bg-[#C8102E] text-white text-xs font-bold grid place-items-center ring-2 ring-[#FBF6EC]">{itemNo}</div></div>
+                <div className="relative shrink-0"><div className="w-20 h-20 bg-white rounded-lg ring-1 ring-black/5 flex items-center justify-center p-1">{it.code?<ArgImg code={it.code} v={it.v} size={200} className="max-w-full max-h-full object-contain"/>:<span className="text-xl">🏷️</span>}</div><div className="absolute -top-2 -left-2 w-6 h-6 rounded-full bg-[#D2232A] text-white text-xs font-bold grid place-items-center ring-2 ring-[#FFF5E4]">{itemNo}</div></div>
                 <span className="text-sm font-semibold leading-tight" style={{maxWidth:160}}>{it.name}</span></div></td>
-              <td className="p-2 text-center font-display font-extrabold text-[#C8102E] tnum whitespace-nowrap">{gbp(sc.price)}</td>
+              <td className="p-2 text-center font-display font-extrabold text-[#D2232A] tnum whitespace-nowrap">{gbp(sc.price)}</td>
               {players.map(p=>{ const r=sc.res[p.id]||{}; const v=r.guess;
-                return <td key={p.id} className={"p-2 text-center tnum whitespace-nowrap "+(p.id===myId?"bg-[#F3EAD6]/60":"")}>{v!=null
-                  ? <span className={r.spot?"inline-block px-2 py-0.5 rounded-full bg-[#C9A646] text-[#2a1e05] font-extrabold":r.win?"inline-block px-2 py-0.5 rounded-full bg-[#C8102E] text-white font-bold":"text-[#4a4032]"}>{r.spot?"👑 ":""}{gbp(v)}</span>
+                return <td key={p.id} className={"p-2 text-center tnum whitespace-nowrap "+(p.id===myId?"bg-[#FBE7C6]/60":"")}>{v!=null
+                  ? <span className={r.spot?"inline-block px-2 py-0.5 rounded-full bg-[#FFC93C] text-[#5A2600] font-extrabold":r.win?"inline-block px-2 py-0.5 rounded-full bg-[#D2232A] text-white font-bold":"text-[#4a4032]"}>{r.spot?"👑 ":""}{gbp(v)}</span>
                   : <span className="text-[#bbb]">—</span>}</td>;})}
             </tr></React.Fragment>);
           }); })()}
-          <tr className="border-t-2 border-[#C8102E]">
+          <tr className="border-t-2 border-[#D2232A]">
             <td className="p-2 font-display font-bold">Total points</td><td/>
-            {players.map(p=><td key={p.id} className={"p-2 text-center font-display font-extrabold text-lg tnum "+(p.id===myId?"bg-[#F3EAD6]":"")}>{p._t}</td>)}
+            {players.map(p=><td key={p.id} className={"p-2 text-center font-display font-extrabold text-lg tnum "+(p.id===myId?"bg-[#FBE7C6]":"")}>{p._t}</td>)}
           </tr>
         </tbody>
       </table>
-      <div className="text-[11px] text-[#8a7a5f] mt-3 text-center">Closest guess circled in red · 👑 spot-on (2 pts) · ties both score</div>
+      <div className="text-[11px] text-[#9A6B4B] mt-3 text-center">Closest guess circled in red · 👑 spot-on (2 pts) · ties both score</div>
     </div>
   );
 }
@@ -1126,12 +1167,12 @@ function awardsFrom(room){
 function Awards({room}){
   const a=awardsFrom(room); if(!a.length) return null;
   return (<div className="mt-5">
-    <div className="text-center font-hand text-2xl text-[#E7C96B] mb-2">And the awards go to…</div>
+    <div className="text-center font-hand text-2xl text-[#FFD873] mb-2">And the awards go to…</div>
     <div className="grid grid-cols-2 gap-2">
-      {a.map((x,i)=>(<div key={i} className="bg-white/10 rounded-xl p-3 ring-1 ring-white/10 text-left">
+      {a.map((x,i)=>(<div key={i} className="clk-panel rounded-xl p-3 text-left">
         <div className="text-2xl leading-none mb-1">{x.e}</div>
         <div className="font-bold text-xs text-white">{x.t}</div>
-        <div className="font-display font-extrabold text-xl text-[#C9A646] leading-tight">{x.n}</div>
+        <div className="font-display font-extrabold text-xl text-[#FFC93C] leading-tight">{x.n}</div>
         <div className="text-[11px] text-white/60 leading-tight">{x.d}</div>
       </div>))}
     </div>
@@ -1144,7 +1185,7 @@ function Final({room,onAgain,isHost,onLeave}){
     <div className="text-center mb-5">
       <div className="text-5xl mb-1 floaty">🏆</div>
       <div className="text-white/60 uppercase tracking-widest text-xs font-bold">Winner</div>
-      <div className="font-display font-extrabold text-5xl text-[#C9A646] pop">{win?win.name:"—"}</div>
+      <div className="font-display font-bold text-5xl text-[#FFC93C] pop drop-shadow-[0_3px_0_rgba(90,0,6,.5)]">{win?win.name:"—"}</div>
       {win&&<div className="text-xl mt-1">with {win._t} points</div>}
     </div>
     <div className="max-w-3xl mx-auto"><ScoreSheet room={room} title/></div>
@@ -1160,7 +1201,7 @@ function Keypad({val,setVal}){
     if(s.includes(".") && (s.split(".")[1]||"").length>=2) return;
     const n=(s==="0"?"":s)+d; if(n.replace(".","").length>7) return; setVal(n);
   };
-  const K=({children,onClick})=><button onClick={onClick} className="bg-white rounded-xl py-3.5 font-bold text-2xl shadow ring-1 ring-black/5 active:translate-y-[1px]">{children}</button>;
+  const K=({children,onClick})=><button onClick={onClick} className="clk-key rounded-2xl py-3 font-semibold text-2xl text-[#3A1A10] active:translate-y-[2px] active:shadow-none">{children}</button>;
   return (<div className="grid grid-cols-3 gap-2 w-full max-w-[320px]">
     {["1","2","3","4","5","6","7","8","9"].map(k=><K key={k} onClick={()=>push(k)}>{k}</K>)}
     <K onClick={()=>push(".")}>.</K>
@@ -1168,13 +1209,13 @@ function Keypad({val,setVal}){
     <K onClick={()=>setVal(s.slice(0,-1))}>⌫</K>
   </div>);
 }
-function Center({children,bg}){ return <div className={"min-h-screen flex flex-col items-center justify-center text-center px-6 text-white "+(bg==="pine"?"bg-gradient-to-b from-[#174A2B] to-[#0e3019]":"bg-gradient-to-b from-[#CE3320] to-[#AE2817]")}>{children}</div>; }
+function Center({children,bg}){ return <div className={"min-h-screen flex flex-col items-center justify-center text-center px-6 text-white "+(bg==="pine"?"clarkos-bg green":"clarkos-bg")}>{children}</div>; }
 function Splash({msg}){ return <Center><div className="text-4xl mb-3 floaty">🎁</div><div className="text-white/80">{msg}</div></Center>; }
 
 /* ---- setup / error screen when Firebase isn't configured ---- */
 function SetupNeeded(){
-  return (<div className="min-h-screen bg-[#AE2817] text-white flex items-center justify-center px-6">
-    <div className="max-w-md bg-white/10 rounded-2xl p-6 ring-1 ring-white/15">
+  return (<div className="min-h-screen bg-[#9E1018] text-white flex items-center justify-center px-6">
+    <div className="max-w-md clk-panel rounded-2xl p-6">
       <div className="text-3xl mb-2">🔌</div>
       <div className="font-display font-extrabold text-2xl mb-2">Almost there — connect Firebase</div>
       <p className="text-white/80 text-sm mb-3">This is the live multiplayer build. It needs a free Firebase Realtime Database to sync phones with the screen. Paste your project's config into the <code className="bg-black/30 px-1 rounded">ARGOS_FIREBASE_CONFIG</code> block near the top of this file, then reload.</p>
@@ -1187,7 +1228,7 @@ function SetupNeeded(){
 function TVCodeEntry({onCode}){
   const [c,setC]=useState("");
   return (<Center><div className="text-5xl mb-3">📺</div><div className="font-display font-extrabold text-2xl mb-1">TV scoreboard</div><div className="text-white/70 mb-4 text-sm">Type the 4-digit room code from a player's phone — your TV remote's number buttons work.</div>
-    <input value={c} onChange={e=>setC(e.target.value.replace(/\D/g,"").slice(0,4))} inputMode="numeric" placeholder="0000" className="rounded-xl px-4 py-3 bg-[#FFF6DD] text-[#8a6d12] border-2 border-[#C9A646] font-display font-extrabold text-3xl tracking-[0.4em] text-center outline-none w-52"/>
+    <input value={c} onChange={e=>setC(e.target.value.replace(/\D/g,"").slice(0,4))} inputMode="numeric" placeholder="0000" className="rounded-xl px-4 py-3 bg-[#FFF5E4] text-[#B0300F] border-2 border-[#FFC93C] font-display font-extrabold text-3xl tracking-[0.4em] text-center outline-none w-52"/>
     <div className="mt-4"><Btn tone="gold" disabled={c.length!==4} onClick={()=>onCode(c)}>Show scoreboard</Btn></div>
   </Center>);
 }
@@ -1196,12 +1237,13 @@ function TVScreen({code,room}){
   if(!room) return <Center><div className="text-4xl mb-3 floaty">📺</div><div className="text-white/80">Looking for room {code}…</div><div className="text-white/50 text-sm mt-1">Make sure someone has started this game on their phone.</div></Center>;
   const players=playerList(room);
   if(room.phase==="lobby"){
-    return (<div className="min-h-screen bg-gradient-to-b from-[#CE3320] to-[#AE2817] text-white flex flex-col items-center justify-center px-8 py-8">
-      <div className="font-hand text-[#E7C96B] text-2xl">{room.title?"The Argos Game":"Christmas Day"}</div>
-      <div className="font-display font-extrabold text-6xl mb-8 text-center">{room.title||"The Argos Game"}</div>
+    return (<div className="min-h-screen clarkos-bg text-white flex flex-col items-center justify-center px-8 py-8">
+      {room.title
+        ? <React.Fragment><Logo size={56} sub={false}/><div className="font-display font-bold text-6xl mt-4 mb-8 text-center">{room.title}</div></React.Fragment>
+        : <Logo size={104} cls="mb-10"/>}
       <div className="flex flex-col sm:flex-row items-center gap-10">
         <div className="text-center"><div className="text-white/60 uppercase tracking-widest font-bold mb-3">Scan to join</div><QR text={joinUrl} size={240}/></div>
-        <div className="text-center"><div className="text-white/60 uppercase tracking-widest font-bold mb-2">Room code</div><div className="font-display font-extrabold text-8xl tracking-[0.12em] text-[#C9A646] tnum">{code}</div></div>
+        <div className="text-center"><div className="text-white/60 uppercase tracking-widest font-bold mb-2">Room code</div><div className="font-display font-extrabold text-8xl tracking-[0.12em] text-[#FFC93C] tnum">{code}</div></div>
       </div>
       <div className="mt-10 w-full max-w-3xl"><div className="text-center text-white/60 uppercase tracking-widest font-bold mb-3">In the game ({players.length})</div>
         <div className="flex flex-wrap justify-center gap-3">{players.map(p=>(<div key={p.id} className="flex items-center gap-2 bg-white/10 rounded-full pl-1.5 pr-4 py-1.5"><div className="w-8 h-8 rounded-full grid place-items-center font-bold text-white" style={{background:p.color}}>{(p.name||"?")[0].toUpperCase()}</div><span className="text-lg font-semibold">{p.name}</span></div>))}</div></div>
@@ -1210,26 +1252,26 @@ function TVScreen({code,room}){
   }
   if(room.phase==="guessing"){
     const nSub=players.filter(p=>(p.submittedRound==null?-1:p.submittedRound)>=room.round).length;
-    return (<div className="min-h-screen bg-gradient-to-b from-[#174A2B] to-[#0e3019] text-white flex flex-col items-center justify-center px-8">
-      <div className="font-display font-extrabold text-5xl text-[#E7C96B] mb-2">Round {room.round+1} of {ROUNDS}</div>
+    return (<div className="min-h-screen clarkos-bg green text-white flex flex-col items-center justify-center px-8">
+      <div className="font-display font-extrabold text-5xl text-[#FFD873] mb-2">Round {room.round+1} of {ROUNDS}</div>
       <div className="text-2xl text-white/80 mb-10">Everyone's guessing on their phones…</div>
       <div className="font-display font-extrabold text-8xl tnum">{nSub}<span className="text-white/40">/{players.length}</span></div>
       <div className="text-white/60 uppercase tracking-widest font-bold mt-2 text-lg">locked in</div>
       <div className="mt-12 w-full max-w-4xl flex flex-wrap justify-center gap-3">
-        {players.map(p=>{const done=(p.submittedRound==null?-1:p.submittedRound)>=room.round; return <div key={p.id} className={"flex items-center gap-2 rounded-full pl-1.5 pr-4 py-1.5 "+(done?"bg-[#C9A646]/25 ring-1 ring-[#C9A646]":"bg-white/10")}><div className="w-8 h-8 rounded-full grid place-items-center font-bold text-white" style={{background:p.color}}>{(p.name||"?")[0].toUpperCase()}</div><span className="text-lg font-semibold">{p.name}</span><span className="text-lg">{done?"✅":"⏳"}</span></div>;})}
+        {players.map(p=>{const done=(p.submittedRound==null?-1:p.submittedRound)>=room.round; return <div key={p.id} className={"flex items-center gap-2 rounded-full pl-1.5 pr-4 py-1.5 "+(done?"bg-[#FFC93C]/25 ring-1 ring-[#FFC93C]":"bg-white/10")}><div className="w-8 h-8 rounded-full grid place-items-center font-bold text-white" style={{background:p.color}}>{(p.name||"?")[0].toUpperCase()}</div><span className="text-lg font-semibold">{p.name}</span><span className="text-lg">{done?"✅":"⏳"}</span></div>;})}
       </div>
     </div>);
   }
   if(room.phase==="reveal"){
     const base=room.round*PER_ROUND; const idxs=[]; for(let i=0;i<PER_ROUND;i++){const p=base+i; if(p<room.order.length)idxs.push(p);}
     const rr=roastRound(room,room.round);
-    const Card=({code,v,label,name,sub,ring})=>(<div className={"rounded-2xl p-3 flex items-center gap-3 ring-1 "+ring}><div className="w-16 h-16 bg-white rounded-lg p-1 flex items-center justify-center shrink-0">{code?<ArgImg code={code} v={v} size={200} className="max-w-full max-h-full object-contain"/>:<span className="text-2xl">🏆</span>}</div><div><div className="text-xs font-bold uppercase tracking-wide text-[#E7C96B]">{label}</div><div className="font-display font-extrabold text-xl">{name}</div><div className="text-white/70 text-sm">{sub}</div></div></div>);
-    return (<div className="min-h-screen bg-gradient-to-b from-[#CE3320] to-[#AE2817] text-white px-6 py-6 overflow-auto no-scrollbar">
-      <div className="text-center mb-4"><Trevor size={104} cls="mx-auto"/><div className="font-hand text-[#E7C96B] text-2xl">Trevor's verdict on round {room.round+1}</div></div>
+    const Card=({code,v,label,name,sub,ring})=>(<div className={"rounded-2xl p-3 flex items-center gap-3 ring-1 "+ring}><div className="w-16 h-16 bg-white rounded-lg p-1 flex items-center justify-center shrink-0">{code?<ArgImg code={code} v={v} size={200} className="max-w-full max-h-full object-contain"/>:<span className="text-2xl">🏆</span>}</div><div><div className="text-xs font-bold uppercase tracking-wide text-[#FFD873]">{label}</div><div className="font-display font-extrabold text-xl">{name}</div><div className="text-white/70 text-sm">{sub}</div></div></div>);
+    return (<div className="min-h-screen clarkos-bg text-white px-6 py-6 overflow-auto no-scrollbar">
+      <div className="text-center mb-4"><Trevor size={104} cls="mx-auto"/><div className="font-hand text-[#FFD873] text-2xl">Trevor's verdict on round {room.round+1}</div></div>
       <div className="max-w-5xl mx-auto flex flex-wrap items-stretch justify-center gap-3 mb-5">
-        {rr.best&&<Card code={rr.best.code} v={rr.best.v} label="🎯 Best guess" name={rr.best.name} sub={gbp(rr.best.g)+" vs "+gbp(rr.best.price)} ring="bg-[#174A2B]/50 ring-[#9BE5A0]/40"/>}
+        {rr.best&&<Card code={rr.best.code} v={rr.best.v} label="🎯 Best guess" name={rr.best.name} sub={gbp(rr.best.g)+" vs "+gbp(rr.best.price)} ring="bg-[#1E7A34]/85 ring-[#9BE5A0]/60"/>}
         {rr.worst&&<Card code={rr.worst.code} v={rr.worst.v} label="🌋 Wildest miss" name={rr.worst.name} sub={gbp(rr.worst.g)+" vs "+gbp(rr.worst.price)} ring="bg-black/25 ring-white/15"/>}
-        {rr.roundWinner&&<Card code={null} label="👑 Round winner" name={rr.roundWinner.name} sub={"+"+rr.roundWinner.rpts+" points"} ring="bg-[#C9A646]/20 ring-[#C9A646]"/>}
+        {rr.roundWinner&&<Card code={null} label="👑 Round winner" name={rr.roundWinner.name} sub={"+"+rr.roundWinner.rpts+" points"} ring="bg-[#FFC93C]/20 ring-[#FFC93C]"/>}
       </div>
       <div className="max-w-5xl mx-auto flex flex-col lg:flex-row items-start justify-center gap-6">
         <div className="flex-1 max-w-4xl w-full"><div className="text-center text-white/70 uppercase tracking-widest font-bold mb-3 text-lg">Round {room.round+1} scoresheet</div><ScoreSheet room={room} idxs={idxs} title/></div>
@@ -1239,10 +1281,10 @@ function TVScreen({code,room}){
   }
   if(room.phase==="final"){
     const ps=playerList(room).map(p=>({...p,_t:totalFor(room,p.id)})).sort((a,b)=>b._t-a._t); const win=ps[0];
-    return (<div className="min-h-screen bg-gradient-to-b from-[#CE3320] to-[#AE2817] text-white flex flex-col items-center px-6 py-8 overflow-auto no-scrollbar">
+    return (<div className="min-h-screen clarkos-bg text-white flex flex-col items-center px-6 py-8 overflow-auto no-scrollbar">
       <div className="text-6xl mb-1 floaty">🏆</div>
       <div className="text-white/60 uppercase tracking-widest font-bold">Winner</div>
-      <div className="font-display font-extrabold text-7xl text-[#C9A646] pop mb-1 text-center">{win?win.name:"—"}</div>
+      <div className="font-display font-extrabold text-7xl text-[#FFC93C] pop mb-1 text-center">{win?win.name:"—"}</div>
       {win&&<div className="text-2xl mb-6">with {win._t} points</div>}
       <div className="w-full max-w-4xl"><ScoreSheet room={room} title/></div>
       <div className="w-full max-w-3xl"><Awards room={room}/></div>
@@ -1255,7 +1297,7 @@ function TVScreen({code,room}){
 function pingJoin(name){
   try{ const AC=window.AudioContext||window.webkitAudioContext; if(AC){ const ac=new AC(); const o=ac.createOscillator(),g=ac.createGain(); o.connect(g); g.connect(ac.destination); o.type="sine"; o.frequency.setValueAtTime(660,ac.currentTime); o.frequency.setValueAtTime(990,ac.currentTime+0.13); g.gain.setValueAtTime(0.0001,ac.currentTime); g.gain.exponentialRampToValueAtTime(0.3,ac.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+0.45); o.start(); o.stop(ac.currentTime+0.45); setTimeout(()=>{try{ac.close();}catch(e){}},700); } }catch(e){}
   try{ if(navigator.vibrate) navigator.vibrate(140); }catch(e){}
-  try{ if(window.Notification && Notification.permission==="granted") new Notification("The Argos Game 🎄",{body:(name||"Someone")+" joined your game"}); }catch(e){}
+  try{ if(window.Notification && Notification.permission==="granted") new Notification("Clarkos 🎄",{body:(name||"Someone")+" joined your game"}); }catch(e){}
 }
 function App(){
   const params=new URLSearchParams(location.search);
@@ -1307,11 +1349,11 @@ function App(){
   function makePlayer(name){ const color=COLORS[Math.abs([...(name||"x")].reduce((a,ch)=>a+ch.charCodeAt(0),0))%COLORS.length]||COLORS[0]; return {name:name||"Player",color,guesses:{},submittedRound:-1}; }
   function leaveGame(){ try{localStorage.removeItem("argosRoom");}catch(e){} setJoined(false); setRoom(null); setCode(""); setErr(""); try{ if(params.get("code")) history.replaceState(null,"",location.pathname); }catch(e){} }
   function startGame(name){ name=(name||"").trim()||"Host"; const c=randCode(); roomRef(c).set({host:myId,phase:"lobby",round:0,order:shuffledOrder().slice(0,TOTAL_N),players:{[myId]:makePlayer(name)},createdAt:Date.now()}).then(()=>{ saveRoom(c); setCode(c); setJoined(true); }).catch(e=>setErr(String(e))); }
-  function startPractice(name){ name=(name||"").trim()||"You"; const c=randCode(); const BOTS=[{id:"bot_trev",name:"Trevor 🤖",color:"#4E9B36"},{id:"bot_con",name:"Connie 🤖",color:"#B83280"}]; const players={[myId]:makePlayer(name)}; BOTS.forEach(b=>{players[b.id]={name:b.name,color:b.color,guesses:{},submittedRound:-1,bot:true};}); roomRef(c).set({host:myId,phase:"guessing",round:0,practice:true,order:shuffledOrder().slice(0,TOTAL_N),players,createdAt:Date.now()}).then(()=>{ saveRoom(c); setCode(c); setJoined(true); }).catch(e=>setErr(String(e))); }
+  function startPractice(name){ name=(name||"").trim()||"You"; const c=randCode(); const BOTS=[{id:"bot_trev",name:"Trevor 🤖",color:"#4FAE2A"},{id:"bot_con",name:"Connie 🤖",color:"#B83280"}]; const players={[myId]:makePlayer(name)}; BOTS.forEach(b=>{players[b.id]={name:b.name,color:b.color,guesses:{},submittedRound:-1,bot:true};}); roomRef(c).set({host:myId,phase:"guessing",round:0,practice:true,order:shuffledOrder().slice(0,TOTAL_N),players,createdAt:Date.now()}).then(()=>{ saveRoom(c); setCode(c); setJoined(true); }).catch(e=>setErr(String(e))); }
   function scheduleGame(name,whenStr,title){ name=(name||"").trim()||"Host"; const startAt=new Date(whenStr).getTime(); if(!startAt||isNaN(startAt)){ setErr("Pick a valid date and time."); return; } const c=randCode(); const r={host:myId,phase:"lobby",round:0,startAt,order:shuffledOrder().slice(0,TOTAL_N),players:{[myId]:makePlayer(name)},createdAt:Date.now()}; const tt=(title||"").trim(); if(tt) r.title=tt; roomRef(c).set(r).then(()=>{ saveRoom(c); setCode(c); setJoined(true); }).catch(e=>setErr(String(e))); }
   function joinGame(c,name){ name=(name||"").trim(); roomRef(c).get().then(s=>{ if(!s.exists()){ setErr("No game with code "+c+". Double-check it."); return; } const ex=s.child("players/"+myId).val(); const color=(ex&&ex.color)?ex.color:(COLORS[Math.abs([...(name||"x")].reduce((a,ch)=>a+ch.charCodeAt(0),0))%COLORS.length]||COLORS[0]); const upd=ex?{name,color}:{name,color,guesses:{},submittedRound:-1}; roomRef(c).child("players/"+myId).update(upd).then(()=>{ saveRoom(c); setCode(c); setJoined(true); }); }).catch(e=>setErr(String(e))); }
   if(resuming) return <Splash msg="Reconnecting…"/>;
-  if(!joined) return (<div>{err&&<div className="fixed top-3 inset-x-3 z-50 bg-[#8F0A20] text-white text-sm rounded-xl px-4 py-2 text-center shadow-lg">{err}</div>}<Landing onStart={startGame} onJoin={joinGame} onSchedule={scheduleGame} onPractice={startPractice} prefillCode={code}/></div>);
+  if(!joined) return (<div>{err&&<div className="fixed top-3 inset-x-3 z-50 bg-[#8E0F16] text-white text-sm rounded-xl px-4 py-2 text-center shadow-lg">{err}</div>}<Landing onStart={startGame} onJoin={joinGame} onSchedule={scheduleGame} onPractice={startPractice} prefillCode={code}/></div>);
   return <GameScreen code={code} room={room} isHost={isHost} onLeave={leaveGame}/>;
 }
 
