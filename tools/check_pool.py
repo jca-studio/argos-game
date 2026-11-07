@@ -15,6 +15,8 @@ def family(name):
     b = re.sub(r'\s*-\s*[^-]*$', '', b) if re.search(r'\s?-\s', b) else b   # drop " - Colour/Size" suffix
     b = re.sub(COL, '', b)
     return re.sub(r'\s+', ' ', b).strip(' ,-&')
+SIZED = r'mattress|bedding set|fitted sheet|duvet\b|mattress topper|bed frame|divan|headboard'
+SIZE = r'\b(single|small double|double|king ?size|kingsize|king|super ?king|superking|toddler|cot|cot bed|crib|moses basket|shorty)\b|\d+\s?x\s?\d+\s?cm'
 ITEM = re.compile(r'\{name:"((?:[^"\\]|\\.)*)",gbp:([\d.]+),code:"(\d+)",v:(\d)\},?\n')
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith('--')]
@@ -29,6 +31,9 @@ def main():
         if c in seen_code: problems.append(f'duplicate code {c}: {n}'); continue
         if f in seen_fam: problems.append(f'twin of "{seen_fam[f]}": {n}'); continue
         seen_code.add(c); seen_fam[f] = n; keep.append(m.group(0))
+        # size rule: anything where size drives the price must say which size the price is for
+        if re.search(SIZED, n, re.I) and not re.search(SIZE, n, re.I):
+            problems.append(f'no size in name (look up code {c} and add " - Single" etc.): {n}')
     print(f'{len(items)} items, {len(keep)} unique products, {len(problems)} problems')
     for x in problems: print('  -', x)
     if '--fix' in sys.argv and problems:

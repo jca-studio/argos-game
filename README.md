@@ -59,4 +59,5 @@ GA4 ID retained from previous site source. Game is a separate Vercel project and
 ## Product pool rules (no repeats)
 - **One of each product per game.** Colour/size twins share a family and only one can be drawn.
 - **No repeats across games.** Each phone remembers what it has played; when the host starts, the game avoids anything *any* player in the room has seen. Memory rotates oldest-first once the pool runs out (~25 games).
-- **Double-check before every pool change:** `python3 tools/check_pool.py` flags duplicate codes, names and colour/size twins (exit 1 if any). `--fix` drops the later twin. Add model-level families it can't detect (e.g. "apple watch ultra 4") to `FAMILIES` in the script.
+- **Size in the name.** Mattresses, bedding sets, fitted sheets and similar must say which size the price is for (Argos gives each size its own product code, usually the Single by default).
+- **Double-check before every pool change:** `python3 tools/check_pool.py` flags duplicate codes, names, colour/size twins and size-less bedding/mattresses (exit 1 if any). `--fix` drops the later twin. Add model-level families it can't detect (e.g. "apple watch ultra 4") to `FAMILIES` in the script.
