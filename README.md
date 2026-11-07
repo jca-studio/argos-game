@@ -55,3 +55,8 @@ GA4 ID retained from previous site source. Game is a separate Vercel project and
 - Changed “Three countries. Three time zones.” to “Three countries.” to avoid a potentially inaccurate claim across Seattle, Portugal, and the UK.
 - Preserved the original homepage feature, original photograph, styles, project overview, navigation, analytics scripts, and recurring AI Receipts section.
 - This is an editorial integration for review, **not** a deployment or final publication approval.
+
+## Product pool rules (no repeats)
+- **One of each product per game.** Colour/size twins share a family and only one can be drawn.
+- **No repeats across games.** Each phone remembers what it has played; when the host starts, the game avoids anything *any* player in the room has seen. Memory rotates oldest-first once the pool runs out (~25 games).
+- **Double-check before every pool change:** `python3 tools/check_pool.py` flags duplicate codes, names and colour/size twins (exit 1 if any). `--fix` drops the later twin. Add model-level families it can't detect (e.g. "apple watch ultra 4") to `FAMILIES` in the script.
