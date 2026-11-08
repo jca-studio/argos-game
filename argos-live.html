@@ -16,6 +16,7 @@
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-database-compat.js"></script>
 <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>tailwind.config={theme:{extend:{screens:{short:{raw:"(max-height: 700px)"}}}}};</script>
 <style>
   html,body{margin:0;background:#9E1018;}
   body{font-family:"Nunito",system-ui,sans-serif;}
@@ -927,25 +928,25 @@ function GuessDeck({code,room}){
       <div className="flex justify-center gap-2 py-2.5 shrink-0">
         {positions.map((p,i)=><button key={i} onClick={()=>setCur(i)} className={"w-3 h-3 rounded-full transition "+(i===cur?"bg-[#D2232A] scale-125":parseFloat(vals[i])>0?"bg-[#1E7A34]":"bg-[#EBCF9E]")}/>)}
       </div>
-      <div className="flex-1 min-h-0 overflow-auto no-scrollbar flex items-center justify-center px-5 py-4">
-        <div className="w-full max-w-3xl flex flex-col sm:flex-row sm:items-center sm:justify-center gap-4 sm:gap-10">
+      <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar flex flex-col px-5 py-3 short:py-2">
+        <div className="m-auto w-full max-w-3xl flex flex-col sm:flex-row sm:items-center sm:justify-center gap-3 short:gap-2 sm:gap-10">
           <div className="flex flex-col items-center shrink-0">
-            <Photo idx={room.order[pos]} reveal={false} cls="h-56 sm:h-64"/>
-            <div className="font-display font-bold text-lg text-center mt-3 max-w-xs leading-tight">{item.name}</div>
+            <Photo idx={room.order[pos]} reveal={false} cls="h-[clamp(7rem,calc(100dvh-32rem),15rem)] sm:h-64"/>
+            <div className="font-display font-bold text-lg short:text-base text-center mt-3 short:mt-2 max-w-xs leading-tight">{item.name}</div>
             {item.desc && <div className="text-[#9A6B4B] text-xs text-center mt-0.5 max-w-xs leading-snug">{item.desc}</div>}
           </div>
           <div className="flex flex-col items-center w-full sm:w-72">
-            <label className="text-[#9A6B4B] text-sm font-bold">Your price guess</label>
-            <div className="font-display font-bold text-5xl text-[#D2232A] mb-2 tnum">£{vals[cur]||"0"}</div>
+            <label className="text-[#9A6B4B] text-sm short:text-xs font-bold">Your price guess</label>
+            <div className="font-display font-bold text-5xl short:text-4xl text-[#D2232A] mb-2 short:mb-1 tnum">£{vals[cur]||"0"}</div>
             <Keypad val={vals[cur]} setVal={setVal}/>
-            <div className="flex gap-3 items-stretch w-full max-w-[320px] mt-4">
+            <div className="flex gap-3 items-stretch w-full max-w-[320px] mt-4 short:mt-2">
               <button onClick={()=>setCur(c=>Math.max(0,c-1))} disabled={cur===0} className="rounded-full px-5 bg-[#FBE7C6] text-[#3A1A10] font-bold text-xl disabled:opacity-30">←</button>
               {cur<positions.length-1
-                ? <Btn tone="red" className="flex-1 py-3.5 text-lg" disabled={!(parseFloat(vals[cur])>0)} onClick={()=>setCur(c=>c+1)}>Next item →</Btn>
-                : <Btn tone="pine" className="flex-1 py-3.5 text-lg" disabled={!allIn} onClick={submit}>🔒 Submit all {positions.length}</Btn>}
+                ? <Btn tone="red" className="flex-1 py-3.5 short:py-2.5 text-lg" disabled={!(parseFloat(vals[cur])>0)} onClick={()=>setCur(c=>c+1)}>Next item →</Btn>
+                : <Btn tone="pine" className="flex-1 py-3.5 short:py-2.5 text-lg" disabled={!allIn} onClick={submit}>🔒 Submit all {positions.length}</Btn>}
             </div>
             {cur===positions.length-1 && !allIn && <div className="text-center text-[#9A6B4B] text-[11px] mt-2">Put a price on every item — {filled}/{positions.length} done.</div>}
-            <div className="text-[#9A6B4B] text-[11px] mt-2">Tap <b>.</b> for pennies</div>
+            <div className="text-[#9A6B4B] text-[11px] mt-2 short:hidden">Tap <b>.</b> for pennies</div>
           </div>
         </div>
       </div>
@@ -1177,8 +1178,8 @@ function Keypad({val,setVal}){
     if(s.includes(".") && (s.split(".")[1]||"").length>=2) return;
     const n=(s==="0"?"":s)+d; if(n.replace(".","").length>7) return; setVal(n);
   };
-  const K=({children,onClick})=><button onClick={onClick} className="clk-key rounded-2xl py-3 font-semibold text-2xl text-[#3A1A10] active:translate-y-[2px] active:shadow-none">{children}</button>;
-  return (<div className="grid grid-cols-3 gap-2 w-full max-w-[320px]">
+  const K=({children,onClick})=><button onClick={onClick} className="clk-key rounded-2xl py-3 short:py-2 font-semibold text-2xl short:text-xl text-[#3A1A10] active:translate-y-[2px] active:shadow-none">{children}</button>;
+  return (<div className="grid grid-cols-3 gap-2 short:gap-1.5 w-full max-w-[320px]">
     {["1","2","3","4","5","6","7","8","9"].map(k=><K key={k} onClick={()=>push(k)}>{k}</K>)}
     <K onClick={()=>push(".")}>.</K>
     <K onClick={()=>push("0")}>0</K>
